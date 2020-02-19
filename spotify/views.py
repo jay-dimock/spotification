@@ -6,8 +6,6 @@ from spotipy import oauth2
 import spotipy.util as util
 from urllib.parse import urlencode
 
-
-
 def index(request):
     token = get_token(request.session)
     if not token: return no_token_redirect(request.session)
@@ -18,10 +16,21 @@ def index(request):
 
     #sp.trace = True
     result = sp.current_user_playlists(limit=50)
+    playlists = []
+
+    while result:
+        for i in range(len(result['items'])):
+            p = result['items'][i]
+            if p['owner']['id'] == str(user.spotify_id):
+                if user.spotify_id==124103193 and p['name'].startswith('Ryan -'): continue
+                playlists.append(p)   
+        if result['next']:
+            result = sp.next(result)  
+        else: result = None
 
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
-        "my_playlists" : result['items'],
+        "my_playlists" : playlists,
     }
     return render(request, "spotify/index.html", context)  
 
