@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>User Profile</title>
+        <meta name="description" content="View/Edit User Profile">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        {% load static %}
+        {% load string_ext %}
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">   
+      
+        <script src="{% static 'modal.js' %}" defer></script>  
+    </head>
+    <body>
+        {% include 'navbar.html' %}
+        <div class="container">
+            <div class="container-inner">
+                <h2 class="pb-4">My Account</h2>
+
+                <!-- The Modal -->
+                <div id="myModal" class="modal">
+                    <!-- Modal content -->
+                    <div class="modal-content" id="modal-content">
+                        <div id="modal-title">
+                            <span id="close">&times;</span> SUCCESS
+                        </div>
+                        <div id="modal-message">
+                        {% if messages %} {% for m in messages %}                                    
+                        {% if m.extra_tags == 'success' %} {{m}} {% endif %}
+                        {% endfor %} {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col col-sm-6">
+                        <form class="edit-user-form mb-4" id="profile-info-form" action="{% url 'login:edit' %}" method="post" >
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{user.id}}">
+                            <h4>Edit Information</h4>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <div id="email-message" class="text-danger">
+                                    {% if messages %} {% for m in messages %}                                    
+                                    {% if m.extra_tags == 'email' %} {{m}} {% endif %}
+                                    {% endfor %} {% endif %}
+                                </div>
+                                <input type="text" id="email" name="email" value="{{email}}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <div id="first-name-message" class="text-danger">
+                                    {% if messages %} {% for m in messages %} 
+                                    {% if m.extra_tags == 'first-name' %} {{m}} {% endif %}
+                                    {% endfor %} {% endif %}
+                                </div>
+                                <input type="text" id="first-name" name="first-name" value="{{first_name}}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <div id="last-name-message" class="text-danger">
+                                    {% if messages %} {% for m in messages %} 
+                                    {% if m.extra_tags == 'last-name' %} {{m}} {% endif %}
+                                    {% endfor %} {% endif %}
+                                </div>
+                                <input type="text" id="last-name" name="last-name" value="{{last_name}}" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-secondary align-self-end">Save</button>
+                        </form>
+                    </div>                
+                    <div class="col col-sm-6">
+                        <form class="edit-user-form mb-4" id="profile-password-form" action="{% url 'login:edit-pw' %}" method="post" >
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{user.id}}">
+                            <h4>Change Password</h4>
+                            <div class="form-group">
+                                <label for="password">New Password</label>
+                                <div id="password-message" class="text-danger">
+                                    {% if messages %} {% for m in messages %}
+                                    {% if m.extra_tags == 'password' %} {{m}} {% endif %}
+                                    {% endfor %} {% endif %}
+                                </div>
+                                <input type="password" name="password" id="password" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">New Password - Confirm</label>
+                                <input type="password" name="confirm-password" id="confirm-password" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-secondary align-self-end">Change Password</button>
+                        </form>
+                    </div>   
+                </div>                
+            </div>        
+        </div>
+    </body>
+</html>
+
