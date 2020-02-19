@@ -51,7 +51,7 @@ class UserManager(models.Manager):
     def registration_validator(self, postData):
         errors = self.name_validator(postData)
 
-        p = password_match_message(postData)
+        p = self.password_match_message(postData)
         if p: errors['password'] = p
         e = self.email_message(postData)
         if e: errors['email'] = e
@@ -101,8 +101,6 @@ class User(models.Model):
     email = models.CharField(max_length=100)
     password = models.CharField(max_length=75)
     spotify_id = models.IntegerField(default=0)
-    token = models.CharField(max_length=255, null=True)
-    refresh_token = models.CharField(max_length=255, null=True)
     birthday = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
