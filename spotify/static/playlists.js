@@ -8,7 +8,7 @@ $(document).ready(function(){
         console.log("playlist id: " + id)
         
         $.ajax({
-            method: "GET",   // we are using a post request here, but this could also be done with a get
+            method: "GET",  
             url: "/spotification/playlist/"+ id,
         })
         .done(function(response){
@@ -60,31 +60,54 @@ function handlePlayback(form, action) {
 }
 
 function failHtml(xhr, status, error) {
-    return '<h4>ERROR</h4>' +
-        '<p><b>' + xhr.status + ": " + xhr.statusText + '</b></p>' +
-        '<p class="text-break">' + xhr.responseText + '</p>' 
+    var html = '<h4>ERROR</h4>';
+    if (!xhr.status) {
+        html += "<p>Unknown error. The server might be offline. Try refreshing the page.</p>"
+    } else {
+        html += '<p><b>' + xhr.status + ": " + xhr.statusText + '</b></p>' +
+            '<p class="text-break">' + xhr.responseText + '</p>';
+    }
+    return html;
+}
+
+function refreshToken() {
+    $.ajax({
+        method: "GET", 
+        url: "token"
+    })
+    .done(function(response){
+        token = response; //token is a global variable in this script
+        console.log("token refreshed")
+    })
+    .fail(function(xhr, status, error) {
+        $('#playlist').html(failHtml(xhr, status, error))
+    });
+    return token;
 }
 
 function spotifyWebPlaybackSDKReady(my_token) {
-    token = my_token;
+    //token = my_token;
     const player = new Spotify.Player({
         name: 'Spotification Player',
-        getOAuthToken: cb => { cb(token); }        
+        getOAuthToken: cb => { cb(refreshToken()); }        
     });
 
     // Error handling
-    player.addListener('initialization_error', ({ message }) => { console.error(message); });
-    player.addListener('authentication_error', ({ message }) => { console.error(message); });
-    player.addListener('account_error', ({ message }) => { console.error(message); });
-    player.addListener('playback_error', ({ message }) => { console.error(message); });
+    player.addListener('initialization_error', ({ message }) => { console.error('initialization_error', message); });
+    player.addListener('authentication_error', ({ message }) => { console.error('authentication_error', message); });
+    player.addListener('account_error', ({ message }) => { console.error('account_error', message); });
+    player.addListener('playback_error', ({ message }) => { console.error('playback_error', message); });
 
     // Playback status updates
     player.addListener('player_state_changed', state => { 
         console.log(state); 
         if (!state) return;
+
+        var playlist = state['context']['metadata']['context_description']
         var track = state['track_window']['current_track']
-        html = 'Now playing:<ul>' +
-            '<li>Track: ' + track['name'] + '</li>' 
+
+        var html = 'Now playing:<ul><li>Playlist: ' + playlist + '</li>'
+        html += '<li>Track: ' + track['name'] + '</li>' 
 
         var artists = [];       
         for (var i=0; i<track['artists'].length; i++) {

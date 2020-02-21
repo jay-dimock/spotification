@@ -61,12 +61,14 @@ def handle_playback(request):
 
     action = request.POST['action'].lower()
     device_id=request.POST['device-id']
+    uri = request.POST['uri']
+    if not uri: #this would happen if user clicked a player button before selecting a playlist.
+        return HttpResponse(False)
+    #print("POST data:", request.POST)
 
     if action == "play":
-        uri = None
-        if 'continue' not in request.POST:
-            uri = request.POST['uri']
-
+        # by not providing a uri to the api, playback will continue where it left off
+        if 'continue' in request.POST: uri = None
         sp.start_playback(device_id=device_id, context_uri=uri)  
 
     elif action == "skip":
@@ -79,50 +81,6 @@ def handle_playback(request):
         raise ValueError('Spotification: action "' + action + '" not recognized') 
 
     return HttpResponse(True)
-
-
-def play(request):
-    token = get_token(request.session)
-    if not token: raise ValueError('Spotification was unable to retrieve user token')    
-
-    sp = spotipy.Spotify(auth=token)
-
-    print("*"*60)
-    print("POST data:", request.POST)
-    print("device-id:", request.POST['device-id'])
-    #example device id: 36353f8f066ee033eaba11e4600083677ddd77d2
-    print("uri:", request.POST['uri'])
-    print("*"*60)
-
-    uri = None
-    if 'continue' not in request.POST:
-        uri = request.POST['uri']
-
-    sp.start_playback(
-        device_id=request.POST['device-id'], 
-        context_uri=uri)
-
-    #return JsonResponse(result) #this is empty
-    return HttpResponse(True)
-
-def skip(requst):
-    token = get_token(request.session)
-    if not token: raise ValueError('Spotification was unable to retrieve user token')   
-
-    device_id = request.POST['device-id']
-    sp = spotipy.Spotify(auth=token)
-    sp.next_track(device_id=device_id)
-    return HttpResponse(True)
-
-def pause(request):
-    token = get_token(request.session)
-    if not token: raise ValueError('Spotification was unable to retrieve user token')   
-
-    device_id = request.POST['device-id']
-    sp = spotipy.Spotify(auth=token)
-    sp.pause_playback(device_id=device_id)
-    return HttpResponse(True)
-
 
 def error(request, error_message):
     if not 'user_id' in request.session:
@@ -167,26 +125,17 @@ def auth(request):
 def get_scope():
     return 'user-library-read playlist-read-private streaming user-read-email user-read-private'
 
-def get_auth_url(username):
-    auth_url = "https://accounts.spotify.com/authorize"
-    client_id = '583e191f6dc9453692417311ed7ed5e0'
-    #client_secret = '2bb74912877749aebb340f7565e622a3'
-    scope = get_scope()
-    redirect_uri = 'http://localhost:8000/spotification/auth'
-    show_dialog = 'false'
-    debug = True
-    if debug: show_dialog = 'true'
+def token(request):
+    #sole purpose here is to provide the UI player with a token so it will not expire after an hour.
+    return HttpResponse(get_token(request.session))
 
-    params = urlencode({
-            'client_id': client_id,
-            'scope': scope,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'username' : username,
-            "show_dialog" : show_dialog
-    })
-    url = auth_url + '?' + params
-    return url
+def get_token(session):
+    if not 'user_id' in session: return None
+    email = User.objects.get(id=session['user_id']).email
+    oauth = get_oauth(email)
+    token_info = oauth.get_cached_token() #Spotipy will auto-refresh if expired
+    if not token_info: return None
+    return token_info['access_token']
 
 def get_oauth(username):
     oauth = oauth2.SpotifyOAuth(
@@ -197,20 +146,34 @@ def get_oauth(username):
         username=username)
     return oauth
 
-def get_token(session):
-    if not 'user_id' in session: return None
-    email = User.objects.get(id=session['user_id']).email
-    oauth = get_oauth(email)
-    token_info = oauth.get_cached_token() #Spotipy will auto-refresh if expired
-    if not token_info: return None
-    return token_info['access_token']
-
 def no_token_redirect(session):
     if not 'user_id' in session:
         return redirect("login:home")
-    else:
+    else: #under normal circumstances this code block will only be hit one time: immediately after the user registers on the site.
         email = User.objects.get(id=session['user_id']).email
-        return redirect(get_auth_url(email))
+
+        auth_url = "https://accounts.spotify.com/authorize"
+        client_id = '583e191f6dc9453692417311ed7ed5e0'
+        scope = get_scope()
+        redirect_uri = 'http://localhost:8000/spotification/auth'
+        show_dialog = 'false'
+
+        #for demo & debugging purposes, force user to re-approve each time this code block is hit.
+        #todo: before deployment, set debug to False.
+        debug = True
+        if debug: show_dialog = 'true' 
+
+        params = urlencode({
+                'client_id': client_id,
+                'scope': scope,
+                'redirect_uri': redirect_uri,
+                'response_type': 'code',
+                'username' : email,
+                "show_dialog" : show_dialog
+        })
+        url = auth_url + '?' + params
+
+        return redirect(auth_url)
 
 
 
