@@ -10,32 +10,60 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
             integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         {% load static %}
-        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">        
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
+        <script src="{% static 'playlists.js' %}" defer></script>   
+        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
     </head>
     <body>
         {% include 'navbar.html' %}
         <div class="container">
             <div class="container-inner">
-                <h4>My Playlists</h4>
-                <p><b>Count: {{my_playlists|length}}</b></h4>
-                <table class="table table-striped table-sm table-bordered">
-                    <tr>
-                        <th>Playlist Name</th>
-                        <th>Owner</th>
-                        <th>Tracks</th>
-                        <th>Open</th>
-                        <th>URI</th>                        
-                    </tr>
-                    {% for p in my_playlists %}
-                    <tr>
-                        <td>{{p.name}}</td>
-                        <td>{{p.owner.display_name}}</td>
-                        <td>{{p.tracks.total}}</td>
-                        <td><a href="{{p.external_urls.spotify}}">Open</a></td>
-                        <td>{{p.uri}}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                <div class= "row">
+                    <div class="col col-sm-6  mb-4">
+                        <h4>My Playlists</h4>
+                        <p><b>Count: {{my_playlists|length}}</b></p>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                    <th>Playlist Name</th>
+                                    <!-- <th>Owner</th> -->
+                                    <th>Tracks</th>
+                                    <th>Open</th>
+                                    <th>URI</th>
+                                    <!-- <th>URI</th>                         -->
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in my_playlists %}
+                                    <tr>                                        
+                                        <td>{{p.name}}</td>
+                                        <!-- <td>{{p.owner.display_name}}</td> -->
+                                        <td>{{p.tracks.total}}</td>
+                                        <td><a href="{{p.external_urls.spotify}}">Open</a></td>
+                                        <!-- <td>{{p.uri}}</td> -->
+                                        <td>{{p.uri}}</td>
+                                    </tr>
+                                    <input type="hidden" name="playlist-id" value="{{p.id}}">
+                                    {% endfor %}
+                                </tbody>                          
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col col-sm-6">
+                        <div id="playlist"></div>
+                        <div id="player" class="mt-4">                            
+                            <h4 >Player</h4>
+                            <script src="https://sdk.scdn.co/spotify-player.js"></script>
+                            <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady('{{token}}');</script>
+                            <input type="hidden" id="device-id" name="device-id" value="">
+                            <button id="play" class="btn btn-success">Play</button>
+                            <button id="pause" class="btn btn-danger">Pause</button>
+
+                            <div id="player-error" class="mt-4"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

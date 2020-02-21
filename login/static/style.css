@@ -28,6 +28,13 @@ form {
     border-radius:10px;
 }
 
+form.inline {
+    display:inline-block;
+    padding:0;
+    margin:0;
+    border-radius:0;
+}
+
 label {
     padding:0;
     margin:0;
@@ -58,19 +65,19 @@ label {
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  }
-  
+}
+
   /* Modal Content/Box */
-  .modal-content {
+.modal-content {
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
     /* padding: 20px; */
     border: 1px solid #888;    
     max-width:400px;
     border-radius:8px;
-  }
+}
 
-  #modal-title {
+#modal-title {
     width:100%;
     border-bottom: 1px solid #888;
     background-color: palegoldenrod;
@@ -80,23 +87,27 @@ label {
     font-weight:bold;
     padding-bottom:10px;
 }
-  
-  /* The Close Button */
-  #close {
+
+/* The Close Button */
+#close {
     color: black;
     font-size: 28px;
     font-weight: bold;
     display:inline;
     padding: 0 15px;
-  }
-  
-  #close:hover,
-  #close:focus {
+}
+
+#close:hover,
+#close:focus {
     color: #888; 
     text-decoration: none;
     cursor: pointer;
-  }
+}
 
-  #modal-message {
-      padding:10px;
-  }
+#modal-message {
+    padding:10px;
+}
+
+.table-responsive {
+    max-height:600px;
+}

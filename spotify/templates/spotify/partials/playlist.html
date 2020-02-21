@@ -1,0 +1,10 @@
+<h4>Selected Playlist</h4>
+<h5>{{playlist.name}}</h5>
+<input type="hidden" id="playlist-uri" value="{{playlist.uri}}">
+
+<label for="group">Add playlist to group: </label>
+<select id="group" name="group_id" class="form-control">
+    {% for g in available_groups %}
+    <option value="{{g.id}}">{{g.name}}</option>
+    {% endfor %}
+</select>
