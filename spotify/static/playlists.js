@@ -13,75 +13,49 @@ $(document).ready(function(){
         })
         .done(function(response){
             $('#playlist').html(response);  // manipulate the dom when the response comes back
-            //$('#uri-to-play').val("spotify:playlist:" + id);
+            $('#uri').val("spotify:playlist:" + id);
             playerHasNewUri = true;
-            pausePlayback(); 
+            handlePlayback($(this), false);
         })
         .fail(function(xhr, status, error) {
             $('#playlist').html(failHtml(xhr, status, error))
         });
     })
 
-    $('#play').click(function(e) {
+    $('.player-button').click(function(e) {
         e.preventDefault();
-        startPlayback(); 
-    });
-
-    
-    $('#pause').click(function(e) {
-        e.preventDefault();
-        pausePlayback();        
-    });
+        var action = $(this).prop('name');
+        form = $(this).parent();
+        handlePlayback(form, action);
+    })
 })
 
-function startPlayback() {
-    var device_id=$('#device-id').val();
-    $('#player-error').html('')
+function handlePlayback(form, action) {
+    $('#player-error').html('');
+    var data = $(form).serialize();
+    data += "&action=" + action;
 
-    data = ""
-    if (playerHasNewUri) {
-        uri = $('#playlist-uri').val()
-        data = '{"context_uri": "' + uri + '"}'
-    }
+    //if uri is not new, player will pick up where it left off instead of starting over
+    if (action=="play" && !playerHasNewUri) data += "&continue=true" ;
 
+    //console.log("FORM DATA: " + data);
     $.ajax({
-        url: "https://api.spotify.com/v1/me/player/play?device_id=" + device_id,
-        type: "PUT",
-        data: data,
-        beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token );},
+        url: 'handle-playback',
+        method: 'post',
+        data: data
     })
     .done(function() { 
-        console.log("started playback");
-        playerHasNewUri = false;
+        if (action=="play") playerHasNewUri = false;
     })
-    .fail(function(xhr, status, error) {
-        if(xhr.status != 403) { 
-            $('#player-error').html(failHtml(xhr, status, error))
-        }            
-    });
-}
-
-function pausePlayback() {
-    var device_id=$('#device-id').val();
-    $('#player-error').html('')
-
-    $.ajax({
-        url: "https://api.spotify.com/v1/me/player/pause?device_id=" + device_id,
-        type: "PUT",
-        beforeSend: function(xhr){xhr.setRequestHeader('Authorization', 'Bearer ' + token );},
-        success: function(data) { 
-            console.log(data)
-        }
-    })
-    .done(function() { console.log("paused playback")})
     .fail(function(xhr, status, error) {
         //todo:
         // if(xhr.status == 401 && xhr.message=="The access token expired") {
-
+        //not sure if this will ever happen now that play/pause requests happen server side.
         // }
-        if(xhr.status != 403) { 
-            $('#player-error').html(failHtml(xhr, status, error))
-        }            
+
+        //403 can happen if player pauses while already paused or plays while already playing. Ignore.
+        if(xhr.status == 403) return;
+        $('#player-error').html(failHtml(xhr, status, error))
     });
 }
 
@@ -94,7 +68,7 @@ function failHtml(xhr, status, error) {
 function spotifyWebPlaybackSDKReady(my_token) {
     token = my_token;
     const player = new Spotify.Player({
-        name: 'Web Playback SDK Quick Start Player',
+        name: 'Spotification Player',
         getOAuthToken: cb => { cb(token); }        
     });
 
@@ -105,12 +79,28 @@ function spotifyWebPlaybackSDKReady(my_token) {
     player.addListener('playback_error', ({ message }) => { console.error(message); });
 
     // Playback status updates
-    player.addListener('player_state_changed', state => { console.log(state); });
+    player.addListener('player_state_changed', state => { 
+        console.log(state); 
+        if (!state) return;
+        var track = state['track_window']['current_track']
+        html = 'Now playing:<ul>' +
+            '<li>Track: ' + track['name'] + '</li>' 
+
+        var artists = [];       
+        for (var i=0; i<track['artists'].length; i++) {
+            artists.push(track['artists'][i]['name'])
+        }
+
+        html += '<li>Artists: ' + artists.join(', ') + '</li>' +
+            '<li>Album: ' + track['album']['name'] + '</li>' +
+            '</ul>'
+        $('#current-track').html(html)
+    });
 
     // Ready
     player.addListener('ready', ({ device_id }) => {        
         console.log('Ready with Device ID', device_id);
-        $('#device-id').val(device_id);
+        $('.device-id').val(device_id);
     });
 
     // Not Ready

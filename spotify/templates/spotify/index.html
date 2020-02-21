@@ -56,10 +56,17 @@
                             <h4 >Player</h4>
                             <script src="https://sdk.scdn.co/spotify-player.js"></script>
                             <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady('{{token}}');</script>
-                            <input type="hidden" id="device-id" name="device-id" value="">
-                            <button id="play" class="btn btn-success">Play</button>
-                            <button id="pause" class="btn btn-danger">Pause</button>
-
+                            <div id="current-track"></div>
+                            
+                            <form id="player-form" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" id="device-id" class= "device-id" name="device-id">
+                                <input type="hidden" id="uri" name="uri">
+                                <!-- input "name" below will load into post data "action" key -->
+                                <input type="submit" name="play" value="Play" class="player-button btn btn-success">
+                                <input type="submit" name="skip" value="Skip" class="player-button btn btn-secondary">
+                                <input type="submit" name="pause" value="Pause" class="player-button btn btn-danger">
+                            </form>
                             <div id="player-error" class="mt-4"></div>
                         </div>
                     </div>

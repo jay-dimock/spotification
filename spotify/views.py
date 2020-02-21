@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
+from django.http import JsonResponse
 from login.models import User
 from spotify.models import *
 import spotipy
@@ -6,6 +7,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy import oauth2
 import spotipy.util as util
 from urllib.parse import urlencode
+
+#from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     token = get_token(request.session)
@@ -49,44 +52,73 @@ def playlist(request, id):
     }
     return render(request, "spotify/partials/playlist.html", context)
 
-def play(request):
+def handle_playback(request):
     token = get_token(request.session)
-    if not token: return HttpResponse(False)
-    #example player id: 36353f8f066ee033eaba11e4600083677ddd77d2
+    if not token: 
+        raise ValueError('Spotification was unable to retrieve user token') 
 
     sp = spotipy.Spotify(auth=token)
-    #sp.start_playback(device_id=device_id, uris=my_tracks)
-    print("*"*60)
-    print("device-id:", request.POST['device-id'])
-    print("uri:", request.POST['uri'])
-    print("*"*60)
 
-    
-    #curl -X "PUT" "https://api.spotify.com/v1/me/player/play?device_id=36353f8f066ee033eaba11e4600083677ddd77d2" 
-    # --data "{\"context_uri\":\"spotify:album:5ht7ItJgpBH7W6vJ5BqpPr\",\"offset\":{\"position\":5},\"position_ms\":0}" 
-    # -H "Accept: application/json" -H "Content-Type: application/json" 
-    # -H "Authorization: Bearer BQAjoORMWDKQ5pGHoSPuU0N81RSQ9gE_Xowjjgbsi4i0sdKAJDPFXVvvMmdQ4S6yv3G6rGl7g4ppEz3PSB7XDHzKl1PBlvNww6fk1rxMn98KP8UuFevwIGOzxccJZ7HuUxj4g4Cr7Tuf7PQxq2pJrHCFCx2Pk_uxgvatThHXMv8HkNVPiMwkA2g"
+    action = request.POST['action'].lower()
+    device_id=request.POST['device-id']
 
-    # params = urlencode({
-    #     'device_id': request.POST['device-id'],
-    #     'scope': get_scope(),
-    #     'context_uri': request.POST['uri'],
-    #     'response_type': 'code',
-    #     'username' : username,
-    #     "show_dialog" : show_dialog
-    # })
+    if action == "play":
+        uri = None
+        if 'continue' not in request.POST:
+            uri = request.POST['uri']
 
-    sp.start_playback(
-        device_id=request.POST['device-id'], 
-        context_uri=request.POST['uri'])
+        sp.start_playback(device_id=device_id, context_uri=uri)  
+
+    elif action == "skip":
+        sp.next_track(device_id=device_id)
+
+    elif action == "pause":
+        sp.pause_playback(device_id=device_id)
+
+    else:
+        raise ValueError('Spotification: action "' + action + '" not recognized') 
+
     return HttpResponse(True)
 
 
+def play(request):
+    token = get_token(request.session)
+    if not token: raise ValueError('Spotification was unable to retrieve user token')    
+
+    sp = spotipy.Spotify(auth=token)
+
+    print("*"*60)
+    print("POST data:", request.POST)
+    print("device-id:", request.POST['device-id'])
+    #example device id: 36353f8f066ee033eaba11e4600083677ddd77d2
+    print("uri:", request.POST['uri'])
+    print("*"*60)
+
+    uri = None
+    if 'continue' not in request.POST:
+        uri = request.POST['uri']
+
+    sp.start_playback(
+        device_id=request.POST['device-id'], 
+        context_uri=uri)
+
+    #return JsonResponse(result) #this is empty
+    return HttpResponse(True)
+
+def skip(requst):
+    token = get_token(request.session)
+    if not token: raise ValueError('Spotification was unable to retrieve user token')   
+
+    device_id = request.POST['device-id']
+    sp = spotipy.Spotify(auth=token)
+    sp.next_track(device_id=device_id)
+    return HttpResponse(True)
+
 def pause(request):
     token = get_token(request.session)
-    if not token: return HttpResponse(False)
+    if not token: raise ValueError('Spotification was unable to retrieve user token')   
 
-    device_id = request.POST['device_id']
+    device_id = request.POST['device-id']
     sp = spotipy.Spotify(auth=token)
     sp.pause_playback(device_id=device_id)
     return HttpResponse(True)
