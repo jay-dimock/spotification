@@ -48,49 +48,28 @@ def playlist(request, id):
     playlist = sp.playlist(playlist_id=id)
 
     playlist_groups = []
-
+    available_groups = []
+    internal_playlist_id = 0;
 
     user = User.objects.get(id=request.session['user_id'])
     existing = Playlist.objects.filter(playlist_id=id)
+
     if existing.count() > 0:
         pl = existing.first()
+        internal_playlist_id = pl.id
         playlist_groups = pl.groups.all()
-        # my_groups = user.playlist_groups.all()   
-        # for group in pl.groups.all():
-        #     if group.playlists.filter(id=pl.id).exists():
-        #         playlist_gro
-    
 
-        #debug_print(playlist.__dict__)
+        for pg in user.playlist_groups.all():
+            if not playlist_groups.filter(id=pg.id).exists():
+                available_groups.append(pg)
+    else:
+        available_groups = user.playlist_groups.all()
 
-        # for group in pl.groups:
-        #     playlist_groups.append(group)
-
-        # for g in user.playlist_groups.all():
-        #     group = PlaylistGroup.objects.get(id=g.id)
-        #     if group in playlist.groups.all():
-        #         playlist_groups.append(group)
-        #     else
-        #         available_groups.append(group)
-    
-        # if group.playlists.filter(id=playlist.id).count() > 0:
-        #     playlist_groups.append(group)
-        # else:
-        #     available_groups.append(group)
-    
-        # for g in my_groups:
-        #     if playlist in g.playlists.all():
-        #         playlist_groups.append(g)
-        #     else:
-        #         available_groups.append(g)
-
-    print("playlist groups:", playlist_groups)
-
-    available_groups = PlaylistGroup.objects.filter(user=user)
     context = {
         "playlist": playlist,
+        "internal_playlist_id": internal_playlist_id,
         "playlist_groups": playlist_groups,
-        "available_groups": user.playlist_groups.all()
+        "available_groups": available_groups 
     }
     return render(request, "spotify/partials/playlist.html", context)
 
@@ -121,6 +100,12 @@ def update_playlist(request):
         playlist.groups.add(group)
 
     return redirect("spotification:playlist", id=playlist_id)
+
+def degroup(request, group_id, internal_playlist_id):
+    group = PlaylistGroup.objects.get(id=group_id)
+    playlist = Playlist.objects.get(id=internal_playlist_id)
+    group.playlists.remove(playlist)
+    return redirect("spotification:playlist", id=playlist.playlist_id)
     
 def handle_playback(request):
     token = get_token(request.session)
