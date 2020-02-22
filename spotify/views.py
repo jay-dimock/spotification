@@ -45,13 +45,83 @@ def playlist(request, id):
     if not token: return no_token_redirect(request.session)
 
     sp = spotipy.Spotify(auth=token)
-    p = sp.playlist(playlist_id=id)
+    playlist = sp.playlist(playlist_id=id)
+
+    playlist_groups = []
+
+
+    user = User.objects.get(id=request.session['user_id'])
+    existing = Playlist.objects.filter(playlist_id=id)
+    if existing.count() > 0:
+        pl = existing.first()
+        playlist_groups = pl.groups.all()
+        # my_groups = user.playlist_groups.all()   
+        # for group in pl.groups.all():
+        #     if group.playlists.filter(id=pl.id).exists():
+        #         playlist_gro
+    
+
+        #debug_print(playlist.__dict__)
+
+        # for group in pl.groups:
+        #     playlist_groups.append(group)
+
+        # for g in user.playlist_groups.all():
+        #     group = PlaylistGroup.objects.get(id=g.id)
+        #     if group in playlist.groups.all():
+        #         playlist_groups.append(group)
+        #     else
+        #         available_groups.append(group)
+    
+        # if group.playlists.filter(id=playlist.id).count() > 0:
+        #     playlist_groups.append(group)
+        # else:
+        #     available_groups.append(group)
+    
+        # for g in my_groups:
+        #     if playlist in g.playlists.all():
+        #         playlist_groups.append(g)
+        #     else:
+        #         available_groups.append(g)
+
+    print("playlist groups:", playlist_groups)
+
+    available_groups = PlaylistGroup.objects.filter(user=user)
     context = {
-        "playlist": p,
-        "token" : token,
+        "playlist": playlist,
+        "playlist_groups": playlist_groups,
+        "available_groups": user.playlist_groups.all()
     }
     return render(request, "spotify/partials/playlist.html", context)
 
+def update_playlist(request):
+    token = get_token(request.session)
+    if not token: return no_token_redirect(request.session)
+
+    debug_print(request.POST)
+    errors = PlaylistGroup.objects.add_group_validator(request.POST)    
+
+    group_id = int(request.POST['group-id'])
+    new_group = request.POST['new-group'].strip()
+    if new_group:
+        user = User.objects.get(id=request.session['user_id'])
+        existing = PlaylistGroup.objects.filter(user=user, name=new_group)
+        if existing.count() > 0:
+            group_id = existing.first().id
+        else:
+            group_id = PlaylistGroup.objects.create(user=user, name=new_group).id
+            
+    playlist_id = request.POST['playlist-id']
+    if group_id > 0:
+        group = PlaylistGroup.objects.get(id=group_id)
+        playlists = Playlist.objects.filter(playlist_id=playlist_id)
+        if playlists.count() == 0:
+            Playlist.objects.create(playlist_id=playlist_id)
+        playlist = Playlist.objects.get(playlist_id=playlist_id)
+        playlist.groups.add(group)
+
+    return redirect("spotification:playlist", id=playlist_id)
+    
 def handle_playback(request):
     token = get_token(request.session)
     if not token: 
@@ -64,22 +134,18 @@ def handle_playback(request):
     uri = request.POST['uri']
     if not uri: #this would happen if user clicked a player button before selecting a playlist.
         return HttpResponse(False)
-    #print("POST data:", request.POST)
+    print("*"*50, "\nPOST data:", request.POST)
 
     if action == "play":
         # by not providing a uri to the api, playback will continue where it left off
         if 'continue' in request.POST: uri = None
-        sp.start_playback(device_id=device_id, context_uri=uri)  
-
+        sp.start_playback(device_id=device_id, context_uri=uri) 
     elif action == "skip":
         sp.next_track(device_id=device_id)
-
     elif action == "pause":
         sp.pause_playback(device_id=device_id)
-
     else:
         raise ValueError('Spotification: action "' + action + '" not recognized') 
-
     return HttpResponse(True)
 
 def error(request, error_message):
@@ -176,5 +242,6 @@ def no_token_redirect(session):
         return redirect(auth_url)
 
 
-
+def debug_print(thing_to_print):
+    print("*"*50, "\n", thing_to_print, "\n", "*"*50)
 

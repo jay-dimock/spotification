@@ -51,16 +51,14 @@
                         </div>
                     </div>
                     <div class="col col-sm-6">
-                        <div id="playlist">
-                            
-                        </div>
+                        <form id="playlist-form" method="post" class="minimal"></form>
                         <div id="player" class="mt-4">                            
                             <h4 >Player</h4>
                             <script src="https://sdk.scdn.co/spotify-player.js"></script>
                             <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady('{{token}}');</script>
                             <div id="current-track"></div>
                             
-                            <form id="player-form" method="post">
+                            <form id="player-form" method="post" class="minimal">
                                 {% csrf_token %}
                                 <input type="hidden" id="device-id" class= "device-id" name="device-id">
                                 <input type="hidden" id="uri" name="uri">

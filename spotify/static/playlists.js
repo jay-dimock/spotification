@@ -3,36 +3,59 @@ var playerHasNewUri = true;
 
 $(document).ready(function(){
     $('tr').click(function(){
-        // var data = $("#regForm").serialize()   // capture all the data in the form in the variable data
         id=$(this).next('input').val()
-        console.log("playlist id: " + id)
-        
-        $.ajax({
-            method: "GET",  
-            url: "/spotification/playlist/"+ id,
-        })
-        .done(function(response){
-            $('#playlist').html(response);  // manipulate the dom when the response comes back
-            $('#uri').val("spotify:playlist:" + id);
-            playerHasNewUri = true;
-            handlePlayback($(this), false);
-        })
-        .fail(function(xhr, status, error) {
-            $('#playlist').html(failHtml(xhr, status, error))
-        });
-    })
+        loadPlaylistForm(id);
+    });
+
+    $('#playlist-form').submit(function(e) {
+        e.preventDefault();
+        updatePlaylist();
+    });
 
     $('.player-button').click(function(e) {
         e.preventDefault();
         var action = $(this).prop('name');
-        form = $(this).parent();
-        handlePlayback(form, action);
-    })
+        handlePlayback(action);
+    });
 })
 
-function handlePlayback(form, action) {
+function loadPlaylistForm(id) {
+    console.log("playlist id: " + id);
+    var firstTimeLoading = $('#uri').val() == ""
+        
+    $.ajax({
+        method: "GET",  
+        url: "/spotification/playlist/"+ id,
+    })
+    .done(function(response){
+        $('#playlist-form').html(response);   
+        $('#uri').val("spotify:playlist:" + id);
+        playerHasNewUri = true;
+        if (!firstTimeLoading) handlePlayback("pause");
+    })
+    .fail(function(xhr, status, error) {
+        $('#playlist-form').html(failHtml(xhr, status, error))
+    });
+}
+
+function updatePlaylist() {
+    var data = $('#playlist-form').serialize();
+    $.ajax({
+        url: 'update-playlist',
+        method: 'post',
+        data: data
+    })
+    .done(function(response){
+        $('#playlist-form').html(response);   
+    })
+    .fail(function(xhr, status, error) {
+        $('#playlist-form').html(failHtml(xhr, status, error))
+    });
+}
+
+function handlePlayback(action) {
     $('#player-error').html('');
-    var data = $(form).serialize();
+    var data = $('#player-form').serialize();
     data += "&action=" + action;
 
     //if uri is not new, player will pick up where it left off instead of starting over
@@ -48,13 +71,6 @@ function handlePlayback(form, action) {
         if (action=="play") playerHasNewUri = false;
     })
     .fail(function(xhr, status, error) {
-        //todo:
-        // if(xhr.status == 401 && xhr.message=="The access token expired") {
-        //not sure if this will ever happen now that play/pause requests happen server side.
-        // }
-
-        //403 can happen if player pauses while already paused or plays while already playing. Ignore.
-        if(xhr.status == 403) return;
         $('#player-error').html(failHtml(xhr, status, error))
     });
 }
@@ -63,6 +79,9 @@ function failHtml(xhr, status, error) {
     var html = '<h4>ERROR</h4>';
     if (!xhr.status) {
         html += "<p>Unknown error. The server might be offline. Try refreshing the page.</p>"
+    } else if (xhr.responseText.startsWith('SpotifyException')) {
+        console.log(xhr);
+        return "";
     } else {
         html += '<p><b>' + xhr.status + ": " + xhr.statusText + '</b></p>' +
             '<p class="text-break">' + xhr.responseText + '</p>';
