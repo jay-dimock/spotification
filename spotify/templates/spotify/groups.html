@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Playlist Groups</title>
+        <meta name="description" content="Spotification - edit playlist groups">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
+        <script src="{% static 'playlists.js' %}" defer></script>   
+        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
+    </head>
+    <body>
+        {% include 'navbar.html' %}
+        <div class="container">
+            <div class="container-inner">
+                <div class= "row">
+                    <div class="col col-sm-6  mb-4">
+                        <div id="groups">
+                            <h4>My Playlist Groups</h4>
+                            <label>Click on a group to edit it</label>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Group</th>
+                                            <th>Playlists</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for g in groups %}
+                                        <tr>
+                                            <td>{{g.name}}</td>
+                                            <td>{{g.playlists.all.count}}</td>
+                                        </tr>
+                                        <input type="hidden" name="group-id" value="{{g.id}}">
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col col-sm-6">
+                        <form id="playlist-form" action="{% url 'spotification:update-playlist' %}"  method="post" class="minimal">
+                            {% if not selected_group %}
+                            <h4>Selected Group: None</h4>
+                            {% else %}
+                            {% csrf_token %}
+                            <h4>Selected Group</h4>
+                            <h5>{{selected_group.name}}</h5>
+                            
+                            {% if selected_group.playlists.all|length > 0 %}
+                            <p class="mb-1">Playslists in group:</p>
+                            <ul>
+                                {% for p in selected_playlists %}
+                                <li>{{p.name}} <a href="{% url 'spotification:degroup' group_id=selected_group.id internal_playlist_id=p.id page='groups' %}">remove</a></li>
+                                {% endfor %}
+                            {% endif %}
+                            </ul>
+                            <input type="hidden" id="group-id" name="group-id" value="{{selected_group.id}}">
+                            
+                            <div class="form-group">       
+                                <label for="playlist">Add playlist to group: </label>
+                                <select id="playlist" name="spotify-id" class="form-control">
+                                    <option value="0">[ select a playlist to add ]</option>
+                                    {% for p in all_playlists %}
+                                    <option value="{{p.spotify_id}}">{{p.name}}</option>
+                                    {% endfor %}
+                                </select> 
+                            </div>
+                            
+                            <!-- <div class="form-group">
+                                <label for="new-group">Add to new group:</label>
+                                <input type="text" name="new-group" class="form-control">
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-secondary">Update</button>
+                            </div> -->
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+

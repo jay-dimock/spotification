@@ -5,6 +5,9 @@
     <div class="col col-sm-6 text-right">
         {% if request.session.user_id %}
         <a class="nav-link" href="{% url 'spotification:home' %}">Home</a>
+        <a class="nav-link" href="{% url 'spotification:playlists-start' %}">Playlists</a>
+        <a class="nav-link" href="{% url 'spotification:groups-start' %}">Groups</a>
+        <a class="nav-link" href="{% url 'spotification:player' %}">Player</a>
         <a class="nav-link" href="{% url 'login:profile' %}">Profile</a>
         <a class="nav-link" href="{% url 'login:logout' %}">Log Out</a>
         {% else %}

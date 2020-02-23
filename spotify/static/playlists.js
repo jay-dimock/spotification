@@ -4,13 +4,13 @@ var playerHasNewUri = true;
 $(document).ready(function(){
     $('tr').click(function(){
         id=$(this).next('input').val()
-        loadPlaylistForm(id);
+        $(location).attr('href', id);
     });
 
-    $('#playlist-form').submit(function(e) {
-        e.preventDefault();
-        updatePlaylist();
-    });
+    // $('#playlist-form').submit(function(e) {
+    //     e.preventDefault();
+    //     updatePlaylist();
+    // });
 
     $('.player-button').click(function(e) {
         e.preventDefault();
@@ -19,39 +19,39 @@ $(document).ready(function(){
     });
 })
 
-function loadPlaylistForm(id) {
-    console.log("playlist id: " + id);
-    var firstTimeLoading = $('#uri').val() == ""
+// function loadPlaylistForm(id) {
+//     console.log("playlist id: " + id);
+//     var firstTimeLoading = $('#uri').val() == ""
         
-    $.ajax({
-        method: "GET",  
-        url: "/spotification/playlist/"+ id,
-    })
-    .done(function(response){
-        $('#playlist-form').html(response);   
-        $('#uri').val("spotify:playlist:" + id);
-        playerHasNewUri = true;
-        if (!firstTimeLoading) handlePlayback("pause");
-    })
-    .fail(function(xhr, status, error) {
-        $('#playlist-form').html(failHtml(xhr, status, error))
-    });
-}
+//     $.ajax({
+//         method: "GET",  
+//         url: "/spotification/playlist/"+ id,
+//     })
+//     .done(function(response){
+//         $('#playlist-form').html(response);   
+//         $('#uri').val("spotify:playlist:" + id);
+//         playerHasNewUri = true;
+//         if (!firstTimeLoading) handlePlayback("pause");
+//     })
+//     .fail(function(xhr, status, error) {
+//         $('#playlist-form').html(failHtml(xhr, status, error))
+//     });
+// }
 
-function updatePlaylist() {
-    var data = $('#playlist-form').serialize();
-    $.ajax({
-        url: 'update-playlist',
-        method: 'post',
-        data: data
-    })
-    .done(function(response){
-        $('#playlist-form').html(response);   
-    })
-    .fail(function(xhr, status, error) {
-        $('#playlist-form').html(failHtml(xhr, status, error))
-    });
-}
+// function updatePlaylist() {
+//     var data = $('#playlist-form').serialize();
+//     $.ajax({
+//         url: 'update-playlist',
+//         method: 'post',
+//         data: data
+//     })
+//     .done(function(response){
+//         $('#playlist-form').html(response);   
+//     })
+//     .fail(function(xhr, status, error) {
+//         $('#playlist-form').html(failHtml(xhr, status, error))
+//     });
+// }
 
 function handlePlayback(action) {
     $('#player-error').html('');

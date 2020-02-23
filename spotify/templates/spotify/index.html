@@ -18,82 +18,19 @@
         {% include 'navbar.html' %}
         <div class="container">
             <div class="container-inner">
-                <div class= "row">
-                    <div class="col col-sm-6  mb-4">
-                        <div id="groups">
-                            <h4>My Playlist Groups</h4>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-sm table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Group</th>
-                                            <th>Playlists</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for g in groups %}
-                                        <tr>
-                                            <td>{{g.name}}</td>
-                                            <td>{{g.playlists.all.count}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div id="playlists">
-                            <h4>My Playlists</h4>
-                            <p><b>Count: {{my_playlists|length}}</b></p>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-sm table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                        <th>Playlist Name</th>
-                                        <!-- <th>Owner</th> -->
-                                        <th>Tracks</th>
-                                        <th>Open</th>
-                                        <th>URI</th>
-                                        <!-- <th>URI</th>                         -->
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for p in my_playlists %}
-                                        <tr>                                        
-                                            <td>{{p.name}}</td>
-                                            <!-- <td>{{p.owner.display_name}}</td> -->
-                                            <td>{{p.tracks.total}}</td>
-                                            <td><a href="{{p.external_urls.spotify}}">Open</a></td>
-                                            <!-- <td>{{p.uri}}</td> -->
-                                            <td>{{p.uri}}</td>
-                                        </tr>
-                                        <input type="hidden" name="playlist-id" value="{{p.id}}">
-                                        {% endfor %}
-                                    </tbody>                          
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col col-sm-6">
-                        <form id="playlist-form" method="post" class="minimal"></form>
-                        <div id="player" class="mt-4">                            
-                            <h4 >Player</h4>
-                            <script src="https://sdk.scdn.co/spotify-player.js"></script>
-                            <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady('{{token}}');</script>
-                            <div id="current-track"></div>
-                            
-                            <form id="player-form" method="post" class="minimal">
-                                {% csrf_token %}
-                                <input type="hidden" id="device-id" class= "device-id" name="device-id">
-                                <input type="hidden" id="uri" name="uri">
-                                <!-- input "name" below will load into post data "action" key -->
-                                <input type="submit" name="play" value="Play" class="player-button btn btn-success">
-                                <input type="submit" name="skip" value="Skip" class="player-button btn btn-secondary">
-                                <input type="submit" name="pause" value="Pause" class="player-button btn btn-danger">
-                            </form>
-                            <div id="player-error" class="mt-4"></div>
-                        </div>
-                    </div>
-                </div>
+                <h3>Welcome to Spotification!</h3>
+                <p>This site connects to your personal Spotify account and allows you to group your playlists.
+                    You may then play groups of playlists together. For example, you might choose put your Latin Dance, 
+                    HipHop Dance, and Electronic Dance playlists all under a "Dance" group. Playing that group
+                    would mix all of its playlists together.
+                </p>
+                <p>What would you like to do?</p>
+                <ul>
+                    <li><a href="{% url 'spotification:playlists-start' %}">Manage Playlists</a></li>
+                    <li><a href="{% url 'spotification:groups-start' %}">Manage Groups</a></li>
+                    <li><a href="{% url 'spotification:player' %}" target="_blank">Play a Playlist or Group - in a new tab</a></li>
+                    <li><a href="{% url 'spotification:player' %}">Play a Playlist or Group - in this tab</a></li>
+                </ul>
             </div>
         </div>
     </body>
