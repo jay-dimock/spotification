@@ -52,7 +52,7 @@ def playlist(request, id):
     internal_playlist_id = 0;
 
     user = User.objects.get(id=request.session['user_id'])
-    existing = Playlist.objects.filter(playlist_id=id)
+    existing = Playlist.objects.filter(spotify_id=id)
 
     if existing.count() > 0:
         pl = existing.first()
@@ -80,10 +80,11 @@ def update_playlist(request):
     debug_print(request.POST)
     errors = PlaylistGroup.objects.add_group_validator(request.POST)    
 
+    user = User.objects.get(id=request.session['user_id'])
     group_id = int(request.POST['group-id'])
     new_group = request.POST['new-group'].strip()
     if new_group:
-        user = User.objects.get(id=request.session['user_id'])
+        
         existing = PlaylistGroup.objects.filter(user=user, name=new_group)
         if existing.count() > 0:
             group_id = existing.first().id
@@ -93,10 +94,10 @@ def update_playlist(request):
     playlist_id = request.POST['playlist-id']
     if group_id > 0:
         group = PlaylistGroup.objects.get(id=group_id)
-        playlists = Playlist.objects.filter(playlist_id=playlist_id)
+        playlists = Playlist.objects.filter(spotify_id=playlist_id)
         if playlists.count() == 0:
-            Playlist.objects.create(playlist_id=playlist_id)
-        playlist = Playlist.objects.get(playlist_id=playlist_id)
+            Playlist.objects.create(user=user, spotify_id=playlist_id)
+        playlist = Playlist.objects.get(spotify_id=playlist_id)
         playlist.groups.add(group)
 
     return redirect("spotification:playlist", id=playlist_id)
@@ -105,7 +106,7 @@ def degroup(request, group_id, internal_playlist_id):
     group = PlaylistGroup.objects.get(id=group_id)
     playlist = Playlist.objects.get(id=internal_playlist_id)
     group.playlists.remove(playlist)
-    return redirect("spotification:playlist", id=playlist.playlist_id)
+    return redirect("spotification:playlist", id=playlist.spotify_id)
     
 def handle_playback(request):
     token = get_token(request.session)

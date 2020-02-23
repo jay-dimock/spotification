@@ -26,12 +26,12 @@ class PlaylistGroup(models.Model):
         ]
 
 class Playlist(models.Model):
-    #playlist_group = models.ForeignKey(User, related_name="playlists", on_delete=models.CASCADE)
-    playlist_id = models.CharField(max_length=255)
+    user = models.ForeignKey(User, related_name="playlists", on_delete=models.CASCADE)
+    spotify_id = models.CharField(max_length=255)
     groups = models.ManyToManyField(PlaylistGroup, related_name="playlists")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['playlist_id'], name="unique_constraint_playlist_id")
+            models.UniqueConstraint(fields=['spotify_id', 'user'], name="unique_constraint_playlist_id_user")
         ]
