@@ -25,7 +25,7 @@
                             <div class="form-group form-row">
                                 <label for="group" class="col-sm-3 col-form-label">Play a Playlist Group</label>
                                 <div class="col-sm-6">
-                                    <select name="group-id" value="{{current_group.id}}" class="form-control play-select">
+                                    <select id="selected-group-id" name="group-id" value="{{current_group.id}}" class="form-control play-select">
                                         <option value="0">[ select a group to play ]</option>
                                         {% for g in groups %}
                                         <option value="{{g.id}}" {% if g.id == current_group.id %} selected {% endif %}>{{g.name}}</option>
@@ -33,7 +33,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
-                                    <button type="submit" class="btn btn-success">Play Group (not ready yet)</button>
+                                    <button type="submit" class="btn btn-success">Play Group</button>
                                 </div>
                             </div> 
                         </form>
@@ -65,6 +65,8 @@
                         {% csrf_token %}
                         <input type="hidden" id="device-id" class= "device-id" name="device-id">
                         <input type="hidden" id="uri" name="uri">
+                        <input type="hidden" id="player-group-id" name="group-id">
+                        <input type="hidden" id="tracklist-type" name="tracklist-type">
                         <!-- input "name" below will load into post data "action" key -->
                         <input type="submit" name="play" value="Play" class="player-button btn btn-success">
                         <input type="submit" name="skip" value="Skip" class="player-button btn btn-secondary">

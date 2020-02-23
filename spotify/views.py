@@ -9,6 +9,7 @@ import spotipy.util as util
 import urllib
 from urllib.error import HTTPError
 from urllib.parse import urlencode
+import random
 
 #from django.views.decorators.csrf import csrf_exempt
 
@@ -233,6 +234,9 @@ def degroup(request, group_id, internal_playlist_id, page):
 
 
 def handle_playback(request):
+    if not valid_playback_request(request.POST):
+        return HttpResponse(False)
+
     token = get_token(request.session)
     if not token: 
         raise ValueError('Spotification was unable to retrieve user token') 
@@ -240,23 +244,86 @@ def handle_playback(request):
     sp = spotipy.Spotify(auth=token)
 
     action = request.POST['action'].lower()
-    device_id=request.POST['device-id']
-    uri = request.POST['uri']
-    if not uri: #this would happen if user clicked a player button before selecting a playlist.
-        return HttpResponse(False)
+    device_id = request.POST['device-id']
+
     print("*"*50, "\nPOST data:", request.POST)
 
     if action == "play":
         # by not providing a uri to the api, playback will continue where it left off
-        if 'continue' in request.POST: uri = None
-        sp.start_playback(device_id=device_id, context_uri=uri) 
+        if 'continue' in request.POST: 
+            sp.start_playback(device_id=device_id) 
+        else:
+            tracklist_type = request.POST['tracklist-type']
+            if tracklist_type == 'playlist':
+                sp.start_playback(device_id=device_id, context_uri=request.POST['uri']) 
+            elif tracklist_type == 'group':
+                tracks = get_tracks_for_group(request.POST['group-id'], token)
+                if len(tracks) == 0: 
+                    return HttpResponse(False)
+                sp.start_playback(device_id=device_id, uris=tracks)
+
     elif action == "skip":
         sp.next_track(device_id=device_id)
+
     elif action == "pause":
         sp.pause_playback(device_id=device_id)
+
     else:
         raise ValueError('Spotification: action "' + action + '" not recognized') 
+
     return HttpResponse(True)
+
+def get_tracks_for_group(group_id, token):
+    groups = PlaylistGroup.objects.filter(id=group_id)
+    if groups.count() == 0:
+        debug_print("PlaylistGroup " + group_id + " not found in database")
+        return []
+    group = groups.first()
+    tracks = []    
+
+    #this doesn't work. spotify returns "unsupported uri kind"
+    #for playlist in group.playlists.all():
+        #tracks.append("spotify:playlist:" + playlist.spotify_id)
+
+    sp = spotipy.Spotify(auth=token)
+    for playlist in group.playlists.all():
+        response = sp.playlist_tracks(playlist_id=playlist.spotify_id, fields="items.track.uri")
+        for item in response['items']:
+            tracks.append(item['track']['uri'])
+
+    random.shuffle(tracks)
+
+    return tracks;
+
+
+def valid_playback_request(post):
+    device_id = post['device-id']
+    if not device_id: 
+        debug_print("No device id provided")
+        return False
+
+    tracklist_type = post['tracklist-type']
+    if not tracklist_type:
+        debug_print("No tracklist type provided")
+        return False   
+    
+
+    if tracklist_type == "playlist":
+        if not post['uri']:
+            debug_print("No playlist uri provided")
+            return False
+
+    elif tracklist_type == "group":
+        group_id = post['group-id']
+        if not group_id or group_id == "0":
+            debug_print("No group id provided")
+            return False
+
+    else:
+        debug_print("Tracklist type '" + tracklist_type + "' not recognized")
+        return False
+
+    return True  
 
 
 def error(request, error_message):

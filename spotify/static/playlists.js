@@ -1,5 +1,5 @@
 var token = ""
-var playerHasNewUri = true;
+var playerHasNewTracklist = true;
 
 $(document).ready(function(){
     $('tr').click(function(){
@@ -15,47 +15,30 @@ $(document).ready(function(){
 
     $('#player-playlist-form').submit(function(e) {
         e.preventDefault();
-        var spotify_id = $('#playlist-spotify-id').val()
-        console.log("spotify_idL: " + spotify_id)
+        var spotify_id = $('#playlist-spotify-id').val();
+        //console.log("spotify_id: " + spotify_id);
         //set player uri to match selected playlist
-        $('#uri').val('spotify:playlist:' + spotify_id)
+        $('#uri').val('spotify:playlist:' + spotify_id);
+        $('#tracklist-type').val('playlist');
+        playerHasNewTracklist = true;
+        handlePlayback("play");
+    })
+
+    $('#player-group-form').submit(function(e) {
+        e.preventDefault();
+        var group_id = $('#selected-group-id').val();
+        if (!group_id || group_id == "0") {
+            console.log("No group selected");
+            return;
+        }
+
+        //set player uri to match selected group
+        $('#player-group-id').val(group_id);
+        $('#tracklist-type').val('group');
+        playerHasNewTracklist = true;
         handlePlayback("play");
     })
 })
-
-// function loadPlaylistForm(id) {
-//     console.log("playlist id: " + id);
-//     var firstTimeLoading = $('#uri').val() == ""
-        
-//     $.ajax({
-//         method: "GET",  
-//         url: "/spotification/playlist/"+ id,
-//     })
-//     .done(function(response){
-//         $('#playlist-form').html(response);   
-//         $('#uri').val("spotify:playlist:" + id);
-//         playerHasNewUri = true;
-//         if (!firstTimeLoading) handlePlayback("pause");
-//     })
-//     .fail(function(xhr, status, error) {
-//         $('#playlist-form').html(failHtml(xhr, status, error))
-//     });
-// }
-
-// function updatePlaylist() {
-//     var data = $('#playlist-form').serialize();
-//     $.ajax({
-//         url: 'update-playlist',
-//         method: 'post',
-//         data: data
-//     })
-//     .done(function(response){
-//         $('#playlist-form').html(response);   
-//     })
-//     .fail(function(xhr, status, error) {
-//         $('#playlist-form').html(failHtml(xhr, status, error))
-//     });
-// }
 
 function handlePlayback(action) {
     $('#player-error').html('');
@@ -63,7 +46,7 @@ function handlePlayback(action) {
     data += "&action=" + action;
 
     //if uri is not new, player will pick up where it left off instead of starting over
-    if (action=="play" && !playerHasNewUri) data += "&continue=true" ;
+    if (action=="play" && !playerHasNewTracklist) data += "&continue=true" ;
 
     console.log("FORM DATA: " + data);
     $.ajax({
@@ -72,7 +55,7 @@ function handlePlayback(action) {
         data: data
     })
     .done(function() { 
-        if (action=="play") playerHasNewUri = false;
+        if (action=="play") playerHasNewTracklist = false;
     })
     .fail(function(xhr, status, error) {
         $('#player-error').html(failHtml(xhr, status, error))
