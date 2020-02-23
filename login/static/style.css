@@ -110,3 +110,8 @@ label {
 .table-responsive {
     max-height:600px;
 }
+
+.form-control.play-select {
+    /* max-width:300px; */
+}
+

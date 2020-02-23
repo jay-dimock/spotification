@@ -7,16 +7,20 @@ $(document).ready(function(){
         $(location).attr('href', id);
     });
 
-    // $('#playlist-form').submit(function(e) {
-    //     e.preventDefault();
-    //     updatePlaylist();
-    // });
-
     $('.player-button').click(function(e) {
         e.preventDefault();
         var action = $(this).prop('name');
         handlePlayback(action);
     });
+
+    $('#player-playlist-form').submit(function(e) {
+        e.preventDefault();
+        var spotify_id = $('#playlist-spotify-id').val()
+        console.log("spotify_idL: " + spotify_id)
+        //set player uri to match selected playlist
+        $('#uri').val('spotify:playlist:' + spotify_id)
+        handlePlayback("play");
+    })
 })
 
 // function loadPlaylistForm(id) {
@@ -61,7 +65,7 @@ function handlePlayback(action) {
     //if uri is not new, player will pick up where it left off instead of starting over
     if (action=="play" && !playerHasNewUri) data += "&continue=true" ;
 
-    //console.log("FORM DATA: " + data);
+    console.log("FORM DATA: " + data);
     $.ajax({
         url: 'handle-playback',
         method: 'post',

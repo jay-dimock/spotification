@@ -18,6 +18,44 @@
         {% include 'navbar.html' %}
         <div class="container">
             <div class="container-inner">
+                <div class="row">
+                    <div class="col col-sm-12">
+                        <form id="player-group-form" method="post" class="minimal">
+                            {% csrf_token %}
+                            <div class="form-group form-row">
+                                <label for="group" class="col-sm-3 col-form-label">Play a Playlist Group</label>
+                                <div class="col-sm-6">
+                                    <select name="group-id" value="{{current_group.id}}" class="form-control play-select">
+                                        <option value="0">[ select a group to play ]</option>
+                                        {% for g in groups %}
+                                        <option value="{{g.id}}" {% if g.id == current_group.id %} selected {% endif %}>{{g.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="submit" class="btn btn-success">Play Group (not ready yet)</button>
+                                </div>
+                            </div> 
+                        </form>
+                        <form id="player-playlist-form" method="post" class="minimal">
+                            {% csrf_token %}
+                            <div class="form-group form-row">
+                                <label for="playlist-spotify-id" class="col-sm-3 col-form-label">Play a Playlist</label>
+                                <div class="col-sm-6">
+                                    <select id="playlist-spotify-id" name="spotify-id" value="{{current_spotify_id}}"" class="form-control play-select">
+                                        <option value="0">[ select a playlist to play ]</option>
+                                        {% for p in playlists %}
+                                        <option value="{{p.id}}" {% if p.id == current_spotify_id %} selected {% endif %}>{{p.name}} </option>
+                                        {% endfor %}
+                                        </select>                                
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="submit" class="btn btn-success">Play Playlist</button>
+                                </div>                                
+                            </div>                            
+                        </form>
+                    </div>
+                </div>
                 <div id="player">                            
                     <h4 >Player</h4>
                     <script src="https://sdk.scdn.co/spotify-player.js"></script>

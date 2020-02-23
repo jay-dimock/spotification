@@ -100,17 +100,9 @@ def groups_start(request):
 def groups(request, group_id):
     token = get_token(request.session)
     if not token: return no_token_redirect(request.session)
-
-    if group_id: 
-        request.session['group_id'] = group_id    
-
+    
     user = User.objects.get(id=request.session['user_id'])
-    selected_group = None
-    existing = PlaylistGroup.objects.filter(id=group_id)
-    if existing.count() > 0:
-        selected_group = existing.first()        
-    elif 'group_id' in request.session:
-        del request.session['group_id']
+    selected_group = get_selected_group(request.session, group_id)
 
     playlists=[]
     if selected_group:
@@ -134,49 +126,47 @@ def groups(request, group_id):
     }
     return render(request, "spotify/groups.html", context)  
 
+def get_selected_group(session, group_id=None):
+    if group_id: 
+        session['group_id'] = group_id
+    else:
+        group_id = session['group_id']
+
+    if 'group_id' not in session:
+        return None
+
+    existing = PlaylistGroup.objects.filter(id=group_id)
+    if existing.count() == 0: #if count is 0, this means user has deleted group, so session value is stale.
+        del session['group_id']
+        return None
+    
+    return existing.first()
+
 
 def player(request):
     token = get_token(request.session)
     if not token: return no_token_redirect(request.session)
 
+    current_spotify_id = ""
+    if 'playlist_spotify_id' in request.session:
+        current_spotify_id = request.session['playlist_spotify_id']
+    
+    user = User.objects.get(id=request.session['user_id'])
+    api_result = get_all_playlists(user, token, current_spotify_id)
+    current_group = get_selected_group(request.session)
+    current_playlist_id=""
+    if api_result["selected_playlist"]:
+        current_playlist_id = api_result["selected_playlist"]["id"]
+
     context = {
-        "user_name" : User.objects.get(id=request.session['user_id']).full_name,
+        "user_name" : user.full_name,
         "token" : token,
+        "groups" : user.playlist_groups.all(),
+        "playlists" : api_result['playlists'],
+        "current_group": current_group,
+        "current_spotify_id": current_playlist_id,
     }
     return render(request, "spotify/player.html", context)  
-
-# def playlist(request, id):
-#     token = get_token(request.session)
-#     if not token: return no_token_redirect(request.session)
-
-#     sp = spotipy.Spotify(auth=token)
-#     playlist = sp.playlist(playlist_id=id)
-
-#     playlist_groups = []
-#     available_groups = []
-#     internal_playlist_id = 0;
-
-#     user = User.objects.get(id=request.session['user_id'])
-#     existing = Playlist.objects.filter(spotify_id=id)
-
-#     if existing.count() > 0:
-#         pl = existing.first()
-#         internal_playlist_id = pl.id
-#         playlist_groups = pl.groups.all()
-
-#         for pg in user.playlist_groups.all():
-#             if not playlist_groups.filter(id=pg.id).exists():
-#                 available_groups.append(pg)
-#     else:
-#         available_groups = user.playlist_groups.all()
-
-#     context = {
-#         "playlist": playlist,
-#         "internal_playlist_id": internal_playlist_id,
-#         "playlist_groups": playlist_groups,
-#         "available_groups": available_groups 
-#     }
-#     return render(request, "spotify/partials/playlist.html", context)
 
 def update_playlist(request):
     if not 'user_id' in request.session:
