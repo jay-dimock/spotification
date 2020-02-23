@@ -6,6 +6,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy import oauth2
 import spotipy.util as util
+import urllib
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 
 #from django.views.decorators.csrf import csrf_exempt
@@ -14,22 +16,18 @@ def index(request):
     if not 'user_id' in request.session:
         return redirect("login:home")
 
-    #temp debug:
-    # if 'group_id' in request.session:
-    #     del request.session['group_id']
-    # if 'playlist_spotify_id' in request.session:
-    #     del request.session['playlist_spotify_id']
-
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
     }
     return render(request, "spotify/index.html", context)  
+
 
 def playlists_start(request):
     spotify_id = None
     if 'playlist_spotify_id' in request.session:
         spotify_id = request.session['playlist_spotify_id']
     return redirect("spotification:playlists", spotify_id=spotify_id)
+
 
 def playlists(request, spotify_id):    
     token = get_token(request.session)
@@ -68,6 +66,7 @@ def playlists(request, spotify_id):
     }
     return render(request, "spotify/playlists.html", context)  
 
+
 def get_all_playlists(user, token, spotify_playlist_id=None):
     sp = spotipy.Spotify(auth=token)
 
@@ -97,6 +96,7 @@ def groups_start(request):
         group_id = request.session['group_id']
     return redirect("spotification:groups", group_id=group_id)
 
+
 def groups(request, group_id):
     token = get_token(request.session)
     if not token: return no_token_redirect(request.session)
@@ -116,9 +116,13 @@ def groups(request, group_id):
     if selected_group:
         sp = spotipy.Spotify(auth=token)
         for p in selected_group.playlists.all():
-            result = sp.playlist(playlist_id=p.spotify_id, fields="name,id")
-            playlists.append({ "id":p.id, "name":result['name']})
-
+            #debug_print(p.spotify_id)
+            try:
+                result = sp.playlist(playlist_id=p.spotify_id, fields="name,id")
+                playlists.append({ "id":p.id, "name":result['name']})
+            except spotipy.SpotifyException as e: 
+                debug_print(e)
+            
     api_result = get_all_playlists(user, token)    
 
     context = {
@@ -129,6 +133,7 @@ def groups(request, group_id):
         "all_playlists": api_result['playlists'],
     }
     return render(request, "spotify/groups.html", context)  
+
 
 def player(request):
     token = get_token(request.session)
@@ -174,11 +179,11 @@ def player(request):
 #     return render(request, "spotify/partials/playlist.html", context)
 
 def update_playlist(request):
-    token = get_token(request.session)
-    if not token: return no_token_redirect(request.session)
+    if not 'user_id' in request.session:
+        return redirect("login:home")
 
-    debug_print(request.POST)
-    errors = PlaylistGroup.objects.add_group_validator(request.POST)    
+    #debug_print(request.POST)
+    #errors = PlaylistGroup.objects.add_group_validator(request.POST)    
 
     user = User.objects.get(id=request.session['user_id'])
     group_id = int(request.POST['group-id'])
@@ -194,18 +199,38 @@ def update_playlist(request):
     spotify_id = request.POST['playlist-id']
     if not spotify_id:
         debug_print("Expected playlist spotify ID in POST data but got empty string")
-        return redirect("spotification:playlists-start")       
-    
-    if group_id > 0:
-        group = PlaylistGroup.objects.get(id=group_id)
-        playlists = Playlist.objects.filter(spotify_id=spotify_id)
-        if playlists.count() == 0:
-            Playlist.objects.create(user=user, spotify_id=spotify_id)
-        playlist = Playlist.objects.get(spotify_id=spotify_id)
-        playlist.groups.add(group)
+        return redirect("spotification:playlists-start")    
 
-    #return redirect("spotification:playlist", id=playlist_id)
+    if group_id > 0:
+        add_playlist_to_group(user.id, spotify_id, group_id)   
+
     return redirect("spotification:playlists", spotify_id=spotify_id)
+
+
+def update_group(request):
+    group_id = int(request.POST['group-id'])
+    spotify_id = request.POST['spotify-id']
+    if not spotify_id: #user probably clicked Add without choosing a playlist
+        return redirect("spotification:groups", group_id=group_id)
+
+    if not 'user_id' in request.session:
+        return redirect("login:home")    
+
+    #debug_print(request.POST)
+    add_playlist_to_group(request.session['user_id'], spotify_id, group_id)
+    return redirect("spotification:groups", group_id=group_id)
+
+
+def add_playlist_to_group(user_id, spotify_id, group_id):
+    #this gets called from 2 different pages    
+    group = PlaylistGroup.objects.get(id=group_id)
+    playlists = Playlist.objects.filter(spotify_id=spotify_id)
+    if playlists.count() == 0:
+        user = User.objects.get(id=user_id)        
+        Playlist.objects.create(user=user, spotify_id=spotify_id)
+    playlist = Playlist.objects.get(spotify_id=spotify_id)
+    playlist.groups.add(group)
+
 
 def degroup(request, group_id, internal_playlist_id, page):
     group = PlaylistGroup.objects.get(id=group_id)
@@ -215,6 +240,7 @@ def degroup(request, group_id, internal_playlist_id, page):
         return redirect("spotification:playlists", spotify_id=playlist.spotify_id)
     else:
         return redirect("spotification:groups", group_id=group.id)
+
 
 def handle_playback(request):
     token = get_token(request.session)
@@ -242,6 +268,7 @@ def handle_playback(request):
         raise ValueError('Spotification: action "' + action + '" not recognized') 
     return HttpResponse(True)
 
+
 def error(request, error_message):
     if not 'user_id' in request.session:
         return redirect("login:home")
@@ -250,6 +277,7 @@ def error(request, error_message):
         "error" : error_message
     }
     return render(request, "spotify/error.html", context)
+
 
 def auth(request):
     if not 'user_id' in request.session:
@@ -282,12 +310,15 @@ def auth(request):
     user.save()
     return redirect('spotification:home')
 
+
 def get_scope():
     return 'user-library-read playlist-read-private streaming user-read-email user-read-private'
+
 
 def token(request):
     #sole purpose here is to provide the UI player with a token so it will not expire after an hour.
     return HttpResponse(get_token(request.session))
+
 
 def get_token(session):
     if not 'user_id' in session: return None
@@ -297,6 +328,7 @@ def get_token(session):
     if not token_info: return None
     return token_info['access_token']
 
+
 def get_oauth(username):
     oauth = oauth2.SpotifyOAuth(
         client_id = '583e191f6dc9453692417311ed7ed5e0', 
@@ -305,6 +337,7 @@ def get_oauth(username):
         scope=get_scope(), 
         username=username)
     return oauth
+
 
 def no_token_redirect(session):
     if not 'user_id' in session:

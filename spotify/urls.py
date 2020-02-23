@@ -10,6 +10,7 @@ urlpatterns = [
     path('handle-playback', views.handle_playback, name="handle-playback"),
     path('token', views.token, name="token"),
     path('update-playlist', views.update_playlist, name="update-playlist"),
+    path('update-group', views.update_group, name="update-group"),
     path('degroup/<int:group_id>/<int:internal_playlist_id><page>', views.degroup, name="degroup"),
     path('playlists-start', views.playlists_start, name="playlists-start"),
     path('playlists/<spotify_id>', views.playlists, name="playlists"),
