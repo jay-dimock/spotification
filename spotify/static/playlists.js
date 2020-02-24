@@ -111,8 +111,14 @@ function spotifyWebPlaybackSDKReady(my_token) {
 
         var playlist = state['context']['metadata']['context_description']
         var track = state['track_window']['current_track']
+        var html = "Now playing:<ul>"
 
-        var html = 'Now playing:<ul><li>Playlist: ' + playlist + '</li>'
+        if (playlist === undefined) {
+            html += '<li>Group: ' + $('#selected-group-id option:selected').text() + '</li>'            
+        } else {            
+            html += '<li>Playlist: ' + playlist + '</li>'
+        }
+        
         html += '<li>Track: ' + track['name'] + '</li>' 
 
         var artists = [];       

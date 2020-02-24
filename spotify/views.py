@@ -125,7 +125,8 @@ def groups(request, group_id):
         "selected_playlists": playlists,
         "all_playlists": api_result['playlists'],
     }
-    return render(request, "spotify/groups.html", context)  
+    return render(request, "spotify/groups.html", context)
+
 
 def get_selected_group(session, group_id=None):
     if group_id: 
@@ -168,6 +169,7 @@ def player(request):
         "current_spotify_id": current_playlist_id,
     }
     return render(request, "spotify/player.html", context)  
+
 
 def update_playlist(request):
     if not 'user_id' in request.session:
@@ -281,18 +283,26 @@ def get_tracks_for_group(group_id, token):
     group = groups.first()
     tracks = []    
 
-    #this doesn't work. spotify returns "unsupported uri kind"
-    #for playlist in group.playlists.all():
-        #tracks.append("spotify:playlist:" + playlist.spotify_id)
-
     sp = spotipy.Spotify(auth=token)
     for playlist in group.playlists.all():
-        response = sp.playlist_tracks(playlist_id=playlist.spotify_id, fields="items.track.uri")
-        for item in response['items']:
-            tracks.append(item['track']['uri'])
+        offset = 0
+        while True:
+            response = sp.playlist_tracks(
+                playlist_id=playlist.spotify_id
+                , fields="items.track.uri, next"
+                , offset=offset)
+            
+            if len(response['items']) == 0:
+                break
 
+            for item in response['items']:
+                tracks.append(item['track']['uri'])
+
+            offset += len(response['items'])
+
+    tracks=list(set(tracks)) #this removes duplicate tracks
     random.shuffle(tracks)
-
+    debug_print("tracks retrieved: " + str(len(tracks)))
     return tracks;
 
 
@@ -414,16 +424,16 @@ def no_token_redirect(session):
         if debug: show_dialog = 'true' 
 
         params = urlencode({
-                'client_id': client_id,
-                'scope': scope,
-                'redirect_uri': redirect_uri,
-                'response_type': 'code',
-                'username' : email,
-                "show_dialog" : show_dialog
+            'client_id': client_id,
+            'scope': scope,
+            'redirect_uri': redirect_uri,
+            'response_type': 'code',
+            'username' : email,
+            "show_dialog" : show_dialog
         })
         url = auth_url + '?' + params
 
-        return redirect(auth_url)
+        return redirect(url)
 
 
 def debug_print(thing_to_print):
