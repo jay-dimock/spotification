@@ -7,6 +7,12 @@ $(document).ready(function(){
         $(location).attr('href', id);
     });
 
+    $('#new-group-form').submit(function() {
+        console.log("new group form hit")
+        //only submit form if new group is not whitespace.
+        return $.trim($('#new-group').val())
+    });
+
     $('.player-button').click(function(e) {
         e.preventDefault();
         var action = $(this).prop('name');
@@ -31,7 +37,6 @@ $(document).ready(function(){
             console.log("No group selected");
             return;
         }
-
         //set player uri to match selected group
         $('#player-group-id').val(group_id);
         $('#tracklist-type').val('group');

@@ -51,11 +51,11 @@ def playlists(request, spotify_id):
         internal_playlist_id = pl.id
         playlist_groups = pl.groups.all()
 
-        for pg in user.playlist_groups.all():
+        for pg in user.playlist_groups.all().order_by('name'):
             if not playlist_groups.filter(id=pg.id).exists():
                 available_groups.append(pg)
     else:
-        available_groups = user.playlist_groups.all()
+        available_groups = user.playlist_groups.all().order_by('name')
 
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
@@ -120,7 +120,7 @@ def groups(request, group_id):
 
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
-        "groups": user.playlist_groups.all(),
+        "groups": user.playlist_groups.all().order_by('name'),
         "selected_group": selected_group,
         "selected_playlists": playlists,
         "all_playlists": api_result['playlists'],
@@ -131,10 +131,9 @@ def groups(request, group_id):
 def get_selected_group(session, group_id=None):
     if group_id: 
         session['group_id'] = group_id
-    else:
+    elif 'group_id' in session:
         group_id = session['group_id']
-
-    if 'group_id' not in session:
+    else:
         return None
 
     existing = PlaylistGroup.objects.filter(id=group_id)
@@ -163,7 +162,7 @@ def player(request):
     context = {
         "user_name" : user.full_name,
         "token" : token,
-        "groups" : user.playlist_groups.all(),
+        "groups" : user.playlist_groups.all().order_by('name'),
         "playlists" : api_result['playlists'],
         "current_group": current_group,
         "current_spotify_id": current_playlist_id,
@@ -176,18 +175,12 @@ def update_playlist(request):
         return redirect("login:home")
 
     #debug_print(request.POST)
-    #errors = PlaylistGroup.objects.add_group_validator(request.POST)    
 
     user = User.objects.get(id=request.session['user_id'])
     group_id = int(request.POST['group-id'])
-    new_group = request.POST['new-group'].strip()  
-    
-    if new_group:        
-        existing = PlaylistGroup.objects.filter(user=user, name=new_group)
-        if existing.count() > 0:
-            group_id = existing.first().id
-        else:
-            group_id = PlaylistGroup.objects.create(user=user, name=new_group).id
+
+    new_group_id = add_group(user, request.POST['new-group'])
+    if new_group_id > 0: group_id = new_group_id
 
     spotify_id = request.POST['playlist-id']
     if not spotify_id:
@@ -198,6 +191,21 @@ def update_playlist(request):
         add_playlist_to_group(user.id, spotify_id, group_id)   
 
     return redirect("spotification:playlists", spotify_id=spotify_id)
+
+def new_group(request):
+    if not 'user_id' in request.session:
+        return redirect("login:home")
+    user = User.objects.get(id=request.session['user_id'])
+    add_group(user,request.POST['new-group'])
+    return redirect("spotification:groups-start")
+
+# given a group name: if group exists, returns group id, else creates group & returns new group id.
+def add_group(user, group_name):
+    name = group_name.strip()
+    if not group_name: return 0
+    existing = PlaylistGroup.objects.filter(user=user, name=name)
+    if existing.count() > 0: return existing.first().id
+    return PlaylistGroup.objects.create(user=user, name=name).id
 
 
 def update_group(request):
@@ -233,6 +241,26 @@ def degroup(request, group_id, internal_playlist_id, page):
         return redirect("spotification:playlists", spotify_id=playlist.spotify_id)
     else:
         return redirect("spotification:groups", group_id=group.id)
+
+def delete_group(request):
+    if not 'user_id' in request.session:
+        return redirect("login:home")
+
+    user = User.objects.get(id=request.session["user_id"])
+    group = PlaylistGroup.objects.get(id=request.POST["group-id"])
+    if group.user == user:
+        group.delete()
+    return redirect("spotification:groups-start")
+
+def rename_group(request):
+    if not 'user_id' in request.session:
+        return redirect("login:home")
+    new_name=request.POST["new-name"].strip()
+    if new_name:
+        group = PlaylistGroup.objects.get(id=request.POST["group-id"])
+        group.name = new_name
+        group.save()
+    return redirect("spotification:groups", group_id=request.POST["group-id"])
 
 
 def handle_playback(request):
@@ -289,14 +317,17 @@ def get_tracks_for_group(group_id, token):
         while True:
             response = sp.playlist_tracks(
                 playlist_id=playlist.spotify_id
-                , fields="items.track.uri, next"
+                , fields="items.track.uri, items.is_local"
                 , offset=offset)
             
             if len(response['items']) == 0:
                 break
 
             for item in response['items']:
-                tracks.append(item['track']['uri'])
+                if not bool(item['is_local']): #player won't play "local" (non-spotify) tracks
+                    tracks.append(item['track']['uri'])
+                else:
+                     print("*** skipping local track:", item['track']['uri'], "***")
 
             offset += len(response['items'])
 

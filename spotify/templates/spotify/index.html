@@ -16,14 +16,14 @@
     </head>
     <body>
         {% include 'navbar.html' %}
-        <div class="container">
+        <div class="container-fluid">
             <div class="container-inner">
                 <h3>Welcome to Spotification!</h3>
                 <p>This site connects to your personal Spotify account and allows you to group your playlists.
-                    You may then play groups of playlists together. For example, you might choose put your Latin Dance, 
-                    HipHop Dance, and Electronic Dance playlists all under a "Dance" group. Playing that group
-                    would mix all of its playlists together.
-                </p>
+                    You may then play groups of playlists together.</p>
+                <p>For example, you might create a group called "Dance" which contains these playlists: Latin Dance, 
+                    HipHop Dance, and Electronic Dance. When you play the Dance group, the player will shuffle 
+                    the tracks together from those playslists and play them for you.</p>
                 <p>What would you like to do?</p>
                 <ul>
                     <li><a href="{% url 'spotification:playlists-start' %}">Manage Playlists</a></li>

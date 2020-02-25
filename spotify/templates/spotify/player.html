@@ -16,14 +16,14 @@
     </head>
     <body>
         {% include 'navbar.html' %}
-        <div class="container">
+        <div class="container-fluid">
             <div class="container-inner">
                 <div class="row">
                     <div class="col col-sm-12">
                         <form id="player-group-form" method="post" class="minimal">
                             {% csrf_token %}
                             <div class="form-group form-row">
-                                <label for="group" class="col-sm-3 col-form-label">Play a Playlist Group</label>
+                                <label for="group" class="col-sm-3 col-form-label text-right">Play a Playlist Group</label>
                                 <div class="col-sm-6">
                                     <select id="selected-group-id" name="group-id" value="{{current_group.id}}" class="form-control play-select">
                                         <option value="0">[ select a group to play ]</option>
@@ -40,7 +40,7 @@
                         <form id="player-playlist-form" method="post" class="minimal">
                             {% csrf_token %}
                             <div class="form-group form-row">
-                                <label for="playlist-spotify-id" class="col-sm-3 col-form-label">Play a Playlist</label>
+                                <label for="playlist-spotify-id" class="col-sm-3 col-form-label text-right">Play a Playlist</label>
                                 <div class="col-sm-6">
                                     <select id="playlist-spotify-id" name="spotify-id" value="{{current_spotify_id}}"" class="form-control play-select">
                                         <option value="0">[ select a playlist to play ]</option>

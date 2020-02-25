@@ -16,7 +16,7 @@
     </head>
     <body>
         {% include 'navbar.html' %}
-        <div class="container">
+        <div class="container-fluid">
             <div class="container-inner">
                 <div class= "row">
                     <div class="col col-sm-6  mb-4">
@@ -40,7 +40,7 @@
                                             <td>{{p.name}}</td>
                                             <!-- <td>{{p.owner.display_name}}</td> -->
                                             <td>{{p.tracks.total}}</td>
-                                            <td><a href="{{p.external_urls.spotify}}">Open</a></td>
+                                            <td><a href="{{p.external_urls.spotify}}">Spotify Site</a></td>
                                         </tr>
                                         <input type="hidden" name="playlist-id" value="{{p.id}}">
                                         {% endfor %}
