@@ -100,7 +100,7 @@ class User(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.CharField(max_length=100)
     password = models.CharField(max_length=75)
-    spotify_id = models.IntegerField(default=0)
+    spotify_id = models.CharField(max_length=100, null=True)
     birthday = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -33,7 +33,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
-                                    <button type="submit" class="btn btn-success">Play Group</button>
+                                    <button type="submit" id="play-group-button" class="btn btn-success">Play Group</button>
                                 </div>
                             </div> 
                         </form>
@@ -50,16 +50,14 @@
                                         </select>                                
                                 </div>
                                 <div class="col-sm-3">
-                                    <button type="submit" class="btn btn-success">Play Playlist</button>
+                                    <button type="submit" id="play-playlist-button" class="btn btn-success">Play Playlist</button>
                                 </div>                                
                             </div>                            
                         </form>
                     </div>
                 </div>
                 <div id="player">                            
-                    <h4 >Player</h4>
-                    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-                    <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady('{{token}}');</script>
+                    <h4>Player</h4>                    
                     <div id="current-track"></div>                    
                     <form id="player-form" method="post" class="minimal">
                         {% csrf_token %}
@@ -67,6 +65,7 @@
                         <input type="hidden" id="uri" name="uri">
                         <input type="hidden" id="player-group-id" name="group-id">
                         <input type="hidden" id="tracklist-type" name="tracklist-type">
+                        
                         <!-- input "name" below will load into post data "action" key -->
                         <input type="submit" name="play" value="Play" class="player-button btn btn-success">
                         <input type="submit" name="skip" value="Skip" class="player-button btn btn-secondary">
@@ -76,6 +75,8 @@
                 </div>                
             </div>
         </div>
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady();</script>
     </body>
 </html>
 

@@ -80,7 +80,7 @@ def get_all_playlists(user, token, spotify_playlist_id=None):
             p = result['items'][i]
             if p['owner']['id'] == str(user.spotify_id): #for the moment, only show playlists owned by this user
                 #for Jay D's account only: filter out friend Ryan's playlists:
-                if user.spotify_id==124103193 and p['name'].startswith('Ryan -'): continue
+                if user.spotify_id=="124103193" and p['name'].startswith('Ryan -'): continue
                 playlists.append(p)  
                 if p['id'] == spotify_playlist_id:
                     selected_playlist = p
@@ -153,15 +153,18 @@ def player(request):
         current_spotify_id = request.session['playlist_spotify_id']
     
     user = User.objects.get(id=request.session['user_id'])
+
     api_result = get_all_playlists(user, token, current_spotify_id)
+
     current_group = get_selected_group(request.session)
+    
     current_playlist_id=""
     if api_result["selected_playlist"]:
         current_playlist_id = api_result["selected_playlist"]["id"]
 
     context = {
         "user_name" : user.full_name,
-        "token" : token,
+        # "token" : token,
         "groups" : user.playlist_groups.all().order_by('name'),
         "playlists" : api_result['playlists'],
         "current_group": current_group,
@@ -397,15 +400,15 @@ def auth(request):
     if not token_info:
         return error(request, "Auth code was sent to Spotify but no token info was returned")
 
-    user.token = token_info['access_token']
-    user.refresh_token = token_info['refresh_token']
+    #user.token = token_info['access_token']
+    #user.refresh_token = token_info['refresh_token']
 
     if not user.spotify_id:
-        sp = spotipy.Spotify(auth=user.token)
+        sp = spotipy.Spotify(token_info['access_token'])
         results = sp.current_user()
         user.spotify_id = results['id']
-
-    user.save()
+        user.save()
+    
     return redirect('spotification:home')
 
 

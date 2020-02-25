@@ -2,6 +2,10 @@ var token = ""
 var playerHasNewTracklist = true;
 
 $(document).ready(function(){
+    $('#play-playlist-button').hide()
+    $('#play-group-button').hide()
+    $('#player').hide()
+
     $('tr').click(function(){
         id=$(this).next('input').val()
         $(location).attr('href', id);
@@ -46,12 +50,18 @@ $(document).ready(function(){
 })
 
 function handlePlayback(action) {
+    $('#player').show();
     $('#player-error').html('');
     var data = $('#player-form').serialize();
     data += "&action=" + action;
 
     //if uri is not new, player will pick up where it left off instead of starting over
-    if (action=="play" && !playerHasNewTracklist) data += "&continue=true" ;
+    if (action=="play" && !playerHasNewTracklist) {
+        data += "&continue=true";
+        console.log("Requesting to continue playback...");
+    } else {
+        console.log("Requesting to play new tracklist");
+    }
 
     console.log("FORM DATA: " + data);
     $.ajax({
@@ -60,10 +70,10 @@ function handlePlayback(action) {
         data: data
     })
     .done(function() { 
-        if (action=="play") playerHasNewTracklist = false;
+        if (action=="play") playerHasNewTracklist = false;        
     })
     .fail(function(xhr, status, error) {
-        $('#player-error').html(failHtml(xhr, status, error))
+        $('#player-error').html(failHtml(xhr, status, error));
     });
 }
 
@@ -96,7 +106,7 @@ function refreshToken() {
     return token;
 }
 
-function spotifyWebPlaybackSDKReady(my_token) {
+function spotifyWebPlaybackSDKReady() {
     //token = my_token;
     const player = new Spotify.Player({
         name: 'Spotification Player',
@@ -105,7 +115,11 @@ function spotifyWebPlaybackSDKReady(my_token) {
 
     // Error handling
     player.addListener('initialization_error', ({ message }) => { console.error('initialization_error', message); });
-    player.addListener('authentication_error', ({ message }) => { console.error('authentication_error', message); });
+    
+    player.addListener('authentication_error', ({ message }) => { 
+        //todo: see if can redirect to somewhere to get new auth token, or something....
+        console.error('authentication_error', message); 
+    });
     player.addListener('account_error', ({ message }) => { console.error('account_error', message); });
     player.addListener('playback_error', ({ message }) => { console.error('playback_error', message); });
 
@@ -134,18 +148,23 @@ function spotifyWebPlaybackSDKReady(my_token) {
         html += '<li>Artists: ' + artists.join(', ') + '</li>' +
             '<li>Album: ' + track['album']['name'] + '</li>' +
             '</ul>'
-        $('#current-track').html(html)
+        $('#current-track').html(html);
     });
 
     // Ready
     player.addListener('ready', ({ device_id }) => {        
         console.log('Ready with Device ID', device_id);
         $('.device-id').val(device_id);
+        $('#play-playlist-button').show();
+        $('#play-group-button').show();
+        $('#player-error').html('');
     });
 
     // Not Ready
     player.addListener('not_ready', ({ device_id }) => {
         console.log('Device ID has gone offline', device_id);
+        var message="<p class='text-danger'>Player hahs gone offline</p>";
+        $('#player-error').html(message);
     });
 
     // Connect to the player!
