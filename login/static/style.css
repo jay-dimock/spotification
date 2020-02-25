@@ -1,0 +1,144 @@
+body {
+    background-color: rgb(82, 82, 82);
+}
+
+a {
+    color:#28a745
+}
+
+a:hover {
+    color:#28a745
+}
+
+.navbar {
+    background-color:black;
+    color:white;
+}
+
+.nav-link {
+    display: inline-block;
+    font-size:1.1rem;
+    color: #34DE5B
+}
+
+.nav-link:hover {
+    color: #3CFF69;
+}
+
+.app-name {
+    display: inline-block;
+    font-size:1.5rem;
+}
+
+#logo {
+    height:30px;
+    width:auto;
+    margin:0 10px 10px 5px;
+    vertical-align: middle;
+}
+
+.container-fluid {
+    background-color: rgb(82, 82, 82);
+    /* background-color: #b1b1b1; */
+    padding:20px 0;
+}
+
+.container-inner {
+    background-color:white;
+    padding:20px;
+    /* border-radius:10px; */
+}
+
+form {
+    background-color: white;
+    padding:20px;
+    border-radius:10px;
+}
+
+form.minimal {
+    padding:0;
+    margin:0;
+    border-radius:0;
+}
+
+label {
+    padding:0;
+    margin:0;
+}
+
+.login-form {
+    max-width:600px;
+    margin:0 auto;
+    margin-top:30px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+  /* Modal Content/Box */
+.modal-content {
+    background-color: white;
+    margin: 15% auto; /* 15% from the top and centered */
+    border: 1px solid #888;    
+    max-width:400px;
+    border-radius:8px;
+}
+
+#modal-title {
+    width:100%;
+    border-bottom: 1px solid #888;
+    background-color: #28a745;
+    color: white;
+    border-radius:8px 8px 0 0;
+    font-size: 18px;
+    /* font-weight:bold; */
+    padding-bottom:10px;
+}
+
+/* The Close Button */
+#close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    display:inline;
+    padding: 0 15px;
+}
+
+#close:hover,
+#close:focus {
+    color: #bcfab4; 
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modal-message {
+    padding:15px;
+}
+
+.table-responsive {
+    max-height:600px;
+}
+
+@media only screen and (min-width: 970px) {
+    .container-inner {
+        max-width:970px;
+        margin:0 auto;
+        border-radius:10px;
+    }
+
+    .container-fluid {
+        padding-left:20px;
+        padding-right:20px;
+    }
+}

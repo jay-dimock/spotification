@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Spotification</title>
+        <meta name="description" content="Spotify Clone">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
+        <script src="{% static 'playlists.js' %}" defer></script>   
+        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
+    </head>
+    <body>
+        {% include 'navbar.html' %}
+        <div class="container-fluid">
+            <div class="container-inner">
+                <h3>Welcome to Spotification!</h3>
+                <p>This site connects to your personal Spotify account and allows you to group your playlists.
+                    You may then play groups of playlists together.</p>
+                <p>For example, you might create a group called "Dance" which contains these playlists: Latin Dance, 
+                    HipHop Dance, and Electronic Dance. When you play the Dance group, the player will shuffle 
+                    the tracks together from those playslists and play them for you.</p>
+                <p>What would you like to do?</p>
+                <ul>
+                    <li><a href="{% url 'spotification:playlists-start' %}">Manage Playlists</a></li>
+                    <li><a href="{% url 'spotification:groups-start' %}">Manage Groups</a></li>
+                    <li><a href="{% url 'spotification:player' %}" target="_blank">Play a Playlist or Group - in a new tab</a></li>
+                    <li><a href="{% url 'spotification:player' %}">Play a Playlist or Group - in this tab</a></li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Player</title>
+        <meta name="description" content="Spotification - Player">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
+        <script src="{% static 'playlists.js' %}" defer></script>   
+        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
+    </head>
+    <body>
+        {% include 'navbar.html' %}
+        <div class="container-fluid">
+            <div class="container-inner">
+                <div class="row">
+                    <div class="col col-sm-12">
+                        <form id="player-group-form" method="post" class="minimal">
+                            {% csrf_token %}
+                            <div class="form-group form-row">
+                                <label for="group" class="col-sm-3 col-form-label text-right">Play a Playlist Group</label>
+                                <div class="col-sm-6">
+                                    <select id="selected-group-id" name="group-id" value="{{current_group.id}}" class="form-control play-select">
+                                        <option value="0">[ select a group to play ]</option>
+                                        {% for g in groups %}
+                                        <option value="{{g.id}}" {% if g.id == current_group.id %} selected {% endif %}>{{g.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="submit" id="play-group-button" class="btn btn-success">Play Group</button>
+                                </div>
+                            </div> 
+                        </form>
+                        <form id="player-playlist-form" method="post" class="minimal">
+                            {% csrf_token %}
+                            <div class="form-group form-row">
+                                <label for="playlist-spotify-id" class="col-sm-3 col-form-label text-right">Play a Playlist</label>
+                                <div class="col-sm-6">
+                                    <select id="playlist-spotify-id" name="spotify-id" value="{{current_spotify_id}}"" class="form-control play-select">
+                                        <option value="0">[ select a playlist to play ]</option>
+                                        {% for p in playlists %}
+                                        <option value="{{p.id}}" {% if p.id == current_spotify_id %} selected {% endif %}>{{p.name}} </option>
+                                        {% endfor %}
+                                        </select>                                
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="submit" id="play-playlist-button" class="btn btn-success">Play Playlist</button>
+                                </div>                                
+                            </div>                            
+                        </form>
+                    </div>
+                </div>
+                <div id="player">                            
+                    <h4>Player</h4>                    
+                    <div id="current-track"></div>                    
+                    <form id="player-form" method="post" class="minimal">
+                        {% csrf_token %}
+                        <input type="hidden" id="device-id" class= "device-id" name="device-id">
+                        <input type="hidden" id="uri" name="uri">
+                        <input type="hidden" id="player-group-id" name="group-id">
+                        <input type="hidden" id="tracklist-type" name="tracklist-type">
+                        
+                        <!-- input "name" below will load into post data "action" key -->
+                        <input type="submit" name="play" value="Play" class="player-button btn btn-success">
+                        <input type="submit" name="skip" value="Skip" class="player-button btn btn-secondary">
+                        <input type="submit" name="pause" value="Pause" class="player-button btn btn-danger">
+                    </form>
+                    <div id="player-error" class="mt-4"></div>
+                </div>                
+            </div>
+        </div>
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <script>window.onSpotifyWebPlaybackSDKReady = () => spotifyWebPlaybackSDKReady();</script>
+    </body>
+</html>
+
