@@ -453,13 +453,6 @@ def auth(request):
     return redirect('spotification:home')
 
 
-<<<<<<< HEAD
-=======
-def get_scope():
-    return 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
-
-
->>>>>>> master
 def token(request):
     #sole purpose here is to provide the UI player with a token so it will not expire after an hour.
     return HttpResponse(get_token(request.session))
@@ -489,7 +482,7 @@ def no_token_redirect(session):
 
 def get_oauth(username):
     #scope is the list of spotify permissions the user will need to approve
-    scope = 'user-library-read playlist-read-private streaming user-read-email user-read-private'
+    scope = 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
 
     oauth = oauth2.SpotifyOAuth(
         client_id = settings.SPOTIFY_CLIENT_ID, 
