@@ -421,10 +421,17 @@ def auth(request):
     if not 'user_id' in request.session:
         return redirect("login:home")    
     
-    message = ''
     if 'code' not in request.GET:
+        message = ''
         if 'error' in request.GET:
-            message = "Spotify authorization response returned this error code: <b>" + request.GET['error'] + "</b>"
+            e = request.GET['error']
+            if e == 'access_denied':
+                message = "<p>Spotify access was denied. In order to use this site, you will need to approve for Spotify to have the "\
+                "requested access. Spotification will only use this access when you are logged in and actively using the site "\
+                "for what is was designed for.</p>"\
+                "<p>Use the BACK button in your browser to go back and approve.</p>"
+            else: 
+                message = "Spotify authorization response returned this error code: <b>" + e + "</b>"
         else:
             message="Cannot authorize Spotify. No auth code was provided in the auth result."
         return error(request, message)
@@ -446,10 +453,6 @@ def auth(request):
     return redirect('spotification:home')
 
 
-def get_scope():
-    return 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
-
-
 def token(request):
     #sole purpose here is to provide the UI player with a token so it will not expire after an hour.
     return HttpResponse(get_token(request.session))
@@ -464,45 +467,32 @@ def get_token(session):
     return token_info['access_token']
 
 
-def get_oauth(username):    
-    oauth = oauth2.SpotifyOAuth(
-        client_id = settings.SPOTIFY_CLIENT_ID, 
-        client_secret= settings.SPOTIFY_CLIENT_SECRET, 
-        redirect_uri='http://localhost:8000/spotification/auth',
-        scope=get_scope(), 
-        username=username)
-    return oauth
-
 def no_token_redirect(session):
+    #get_token was unable to retrieve cached token. we need to send the user to the appropriate place (to either log in to our app or approve spotify access).
     if not 'user_id' in session:
         return redirect("login:home")
     else: #under normal circumstances this code block will only be hit one time: immediately after the user registers on the site.
         email = User.objects.get(id=session['user_id']).email
+        sp_oauth = get_oauth(email) 
+        #sends a request to spotify asking for an auth code.
+        #spotify will recirect to the URL we provided in the oauth object (in this case, our auth endpoint)
+        #our auth endpoint parses out the auth code and exchanges it for a token (see auth method above)
+        return redirect(sp_oauth.get_authorize_url())
 
-        auth_url = "https://accounts.spotify.com/authorize"
-        client_id = settings.SPOTIFY_CLIENT_ID
-        scope = get_scope()
-        redirect_uri = 'http://localhost:8000/spotification/auth'
-        show_dialog = 'false'
 
-        #for demo & debugging purposes, force user to re-approve each time this code block is hit.
-        #todo: before deployment, set debug to False.
-        debug = True
-        if debug: show_dialog = 'true' 
+def get_oauth(username):
+    #scope is the list of spotify permissions the user will need to approve
+    scope = 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
 
-        params = urlencode({
-            'client_id': client_id,
-            'scope': scope,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'username' : email,
-            "show_dialog" : show_dialog
-        })
-        url = auth_url + '?' + params
-
-        return redirect(url)
+    oauth = oauth2.SpotifyOAuth(
+        client_id = settings.SPOTIFY_CLIENT_ID, 
+        client_secret= settings.SPOTIFY_CLIENT_SECRET, 
+        redirect_uri='http://localhost:8000/spotification/auth',
+        scope=scope, 
+        username=username,
+        show_dialog=True)
+    return oauth
 
 
 def debug_print(thing_to_print):
     print("*"*50, "\n", thing_to_print, "\n", "*"*50)
-
