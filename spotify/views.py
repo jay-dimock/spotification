@@ -360,7 +360,11 @@ def get_tracks_for_group(group_id, token):
 
     message = "tracks retrieved: " + str(len(tracks))
 
-    max_tracks = 800
+    #JD: If there are too many tracks, Spotify throws this error:
+    #HTTPError: 413 Client Error: Request Entity Too Large for url
+    #Their documentation doesn't say what the limit is, but testing revealed that 800 tracks threw the error
+    #while 780 tracks did not. To be safe, setting limit to 750 tracks.
+    max_tracks = 750
     if len(tracks) > max_tracks:        
         del tracks[max_tracks:] #delete all elements after the max
         message += "\ntruncated to " + str(len(tracks)) + " tracks"
@@ -423,13 +427,10 @@ def auth(request):
     user = User.objects.get(id=request.session['user_id'])
 
     sp_oauth = get_oauth(user.email) 
-    token_info = sp_oauth.get_access_token(code = request.GET['code'])
+    token_info = sp_oauth.get_access_token(code = request.GET['code'], as_dict=False)
 
     if not token_info:
         return error(request, "Auth code was sent to Spotify but no token info was returned")
-
-    #user.token = token_info['access_token']
-    #user.refresh_token = token_info['refresh_token']
 
     if not user.spotify_id:
         sp = spotipy.Spotify(token_info['access_token'])
@@ -453,21 +454,19 @@ def get_token(session):
     if not 'user_id' in session: return None
     email = User.objects.get(id=session['user_id']).email
     oauth = get_oauth(email)
-    token_info = oauth.get_cached_token() #Spotipy will auto-refresh if expired
+    token_info = oauth.get_cached_token()#Spotipy will auto-refresh if expired
     if not token_info: return None
     return token_info['access_token']
 
 
-def get_oauth(username):
-    
+def get_oauth(username):    
     oauth = oauth2.SpotifyOAuth(
         client_id = settings.SPOTIFY_CLIENT_ID, 
-        client_secret= settings.SPOTIFY_CLIENT_ID, 
+        client_secret= settings.SPOTIFY_CLIENT_SECRET, 
         redirect_uri='http://localhost:8000/spotification/auth',
         scope=get_scope(), 
         username=username)
     return oauth
-
 
 def no_token_redirect(session):
     if not 'user_id' in session:
@@ -476,7 +475,7 @@ def no_token_redirect(session):
         email = User.objects.get(id=session['user_id']).email
 
         auth_url = "https://accounts.spotify.com/authorize"
-        client_id = '583e191f6dc9453692417311ed7ed5e0'
+        client_id = settings.SPOTIFY_CLIENT_ID
         scope = get_scope()
         redirect_uri = 'http://localhost:8000/spotification/auth'
         show_dialog = 'false'
