@@ -99,9 +99,6 @@ def edit_password(request):
     return redirect("login:profile")
 
 def logout(request):
-    # request.session.pop('user_id', None)
-    request.session.clear()
-    return redirect("login:home")
 
 def clear_registration_session(request):
     request.session.pop('first_name', None)
