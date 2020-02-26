@@ -29,7 +29,7 @@
                                     <thead>
                                         <tr>
                                         <th>Playlist Name</th>
-                                        <!-- <th>Owner</th> -->
+                                        <th>Owner</th>
                                         <th>Tracks</th>
                                         <th>Open</th>
                                     </tr>
@@ -38,7 +38,17 @@
                                         {% for p in my_playlists %}
                                         <tr>                                        
                                             <td>{{p.name}}</td>
-                                            <!-- <td>{{p.owner.display_name}}</td> -->
+                                            <td>
+                                                {{p.owner.display_name}}
+                                                {% if user_spotify_id != p.owner.id %}
+                                                <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="playlist_id" value={{p.id}}>
+                                                    <input type="hidden" name="playlist_name" value={{p.name}}>
+                                                    <input class="btn btn-link p-0 m-0" type="submit" value="Make it mine">
+                                                </form>
+                                                {% endif %}
+                                            </td>
                                             <td>{{p.tracks.total}}</td>
                                             <td><a href="{{p.external_urls.spotify}}">Spotify Site</a></td>
                                         </tr>

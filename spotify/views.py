@@ -11,6 +11,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 import random
 from django.conf import settings
+import json
 
 #from django.views.decorators.csrf import csrf_exempt
 
@@ -60,6 +61,7 @@ def playlists(request, spotify_id):
 
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
+        "user_spotify_id" : User.objects.get(id = request.session['user_id']).spotify_id,
         "my_playlists" : api_result['playlists'],
         "selected_playlist" : api_result['selected_playlist'],
         "internal_playlist_id": internal_playlist_id,
@@ -79,12 +81,12 @@ def get_all_playlists(user, token, spotify_playlist_id=None):
     while result:
         for i in range(len(result['items'])):
             p = result['items'][i]
-            if p['owner']['id'] == str(user.spotify_id): #for the moment, only show playlists owned by this user
+            # if p['owner']['id'] == str(user.spotify_id): #for the moment, only show playlists owned by this user
                 #for Jay D's account only: filter out friend Ryan's playlists:
-                if user.spotify_id=="124103193" and p['name'].startswith('Ryan -'): continue
-                playlists.append(p)  
-                if p['id'] == spotify_playlist_id:
-                    selected_playlist = p
+            if user.spotify_id=="124103193" and p['name'].startswith('Ryan -'): continue
+            playlists.append(p)  
+            if p['id'] == spotify_playlist_id:
+                selected_playlist = p
         if result['next']:
             result = sp.next(result)  
         else: result = None
@@ -202,6 +204,26 @@ def new_group(request):
     user = User.objects.get(id=request.session['user_id'])
     add_group(user,request.POST['new-group'])
     return redirect("spotification:groups-start")
+
+#Clone a playlist that the user doesn't own, add it to the database, and unfollow the original playlist
+def clone_followed_playlist(request):
+    token = get_token(request.session)
+    if not token: return no_token_redirect(request.session)
+
+    sp = spotipy.Spotify(auth=token)
+    current_user = User.objects.get(id = request.session['user_id'])
+    original_playlist_tracks_dict = sp.playlist_tracks(request.POST['playlist_id'], fields='items(track(uri))', limit=100, offset=0, market=None)
+    list_of_track_uris = []
+    for key in original_playlist_tracks_dict['items']:
+        list_of_track_uris.append(key['track']['uri'])
+    new_playlist = sp.user_playlist_create(current_user.spotify_id, request.POST['playlist_name'], public=False, description='')
+    sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], list_of_track_uris, position=None)
+    unfollowed = sp.user_playlist_unfollow(current_user.spotify_id, request.POST['playlist_id'])
+    return redirect('spotification:playlists-start')
+
+
+
+    # "track": {"album": {"album_type": "album", "artists": [{"external_urls": {"spotify": "https://open.spotify.com/artist/6iU0naWn1UgiTReoiXqPXI"}, "href": "https://api.spotify.com/v1/artists/6iU0naWn1UgiTReoiXqPXI", "id": "6iU0naWn1UgiTReoiXqPXI", "name": "Chuck Ragan", "type": "artist", "uri": "spotify:artist:6iU0naWn1UgiTReoiXqPXI"}], "available_markets": [], "external_urls": {"spotify": "https://open.spotify.com/album/5v9VhF7vX69wzUW6SVI8nC"}, "href": "https://api.spotify.com/v1/albums/5v9VhF7vX69wzUW6SVI8nC", "id": "5v9VhF7vX69wzUW6SVI8nC", "images": [{"height": 640, "url": "https://i.scdn.co/image/ab67616d0000b2733e3f856438310a78e56ad334", "width": 640}, {"height": 300, "url": "https://i.scdn.co/image/ab67616d00001e023e3f856438310a78e56ad334", "width": 300}, {"height": 64, "url": "https://i.scdn.co/image/ab67616d000048513e3f856438310a78e56ad334", "width": 64}], "name": "Covering Ground", "release_date": "2011-09-13", "release_date_precision": "day", "total_tracks": 10, "type": "album", "uri": "spotify:album:5v9VhF7vX69wzUW6SVI8nC"}, "artists": [{"external_urls": {"spotify": "https://open.spotify.com/artist/6iU0naWn1UgiTReoiXqPXI"}, "href": "https://api.spotify.com/v1/artists/6iU0naWn1UgiTReoiXqPXI", "id": "6iU0naWn1UgiTReoiXqPXI", "name": "Chuck Ragan", "type": "artist", "uri": "spotify:artist:6iU0naWn1UgiTReoiXqPXI"}], "available_markets": [], "disc_number": 1, "duration_ms": 195893, "episode": false, "explicit": false, "external_ids": {"isrc": "USA6G1145802"}, "external_urls": {"spotify": "https://open.spotify.com/track/33qnumlcObmJNo0WUFCeTw"}, "href": "https://api.spotify.com/v1/tracks/33qnumlcObmJNo0WUFCeTw", "id": "33qnumlcObmJNo0WUFCeTw", "is_local": false, "name": "Nomad by Fate", "popularity": 0, "preview_url": null, "track": true, "track_number": 2, "type": "track", "uri": "spotify:track:33qnumlcObmJNo0WUFCeTw"}
 
 # given a group name: if group exists, returns group id, else creates group & returns new group id.
 def add_group(user, group_name):
@@ -431,6 +453,13 @@ def auth(request):
     return redirect('spotification:home')
 
 
+<<<<<<< HEAD
+=======
+def get_scope():
+    return 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
+
+
+>>>>>>> master
 def token(request):
     #sole purpose here is to provide the UI player with a token so it will not expire after an hour.
     return HttpResponse(get_token(request.session))
