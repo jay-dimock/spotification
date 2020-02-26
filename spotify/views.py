@@ -205,14 +205,16 @@ def new_group(request):
 
 #Clone a playlist that the user doesn't own, add it to the database, and unfollow the original playlist
 def clone_followed_playlist(request):
-    #token = get_token(request.session)
-    #if not token: return no_token_redirect(request.session)
+    token = get_token(request.session)
+    if not token: return no_token_redirect(request.session)
 
-    # sp = spotipy.Spotify(auth=token)
-    # unfollowed = sp.user_playlist_unfollow(User.objects.get(id = request.session['user_id']).spotify_id, request.POST['playlist_name'])
-    debug_print("User ID: "+User.objects.get(id = request.session['user_id']).spotify_id)
-    debug_print(request.POST['playlist_name'])
-    return redirect('spotification:home')
+    sp = spotipy.Spotify(auth=token)
+    current_user = User.objects.get(id = request.session['user_id'])
+    original_playlist_tracks = sp.playlist_tracks(request.POST['playlist_id'], fields=None, limit=100, offset=0, market=None)
+    new_playlist = sp.user_playlist_create(current_user.spotify_id, request.POST['playlist_name'], public=False, description='')
+    sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], original_playlist_tracks, position=None)
+    unfollowed = sp.user_playlist_unfollow(current_user.spotify_id, request.POST['playlist_id'])
+    return redirect('spotification:playlists-start')
 
 # given a group name: if group exists, returns group id, else creates group & returns new group id.
 def add_group(user, group_name):
@@ -425,7 +427,7 @@ def auth(request):
 
 
 def get_scope():
-    return 'user-library-read playlist-read-private streaming user-read-email user-read-private'
+    return 'user-library-read playlist-read-private streaming user-read-email user-read-private playlist-modify-private playlist-modify-public'
 
 
 def token(request):

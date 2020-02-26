@@ -44,7 +44,8 @@
                                                 <!-- <br><a href="/unfollow_playlist/{{p.name}}">Make it mine</a> -->
                                                 <form action="{% url 'spotification:unfollow_playlist' %}" method="POST">
                                                     {% csrf_token %}
-                                                    <input type="hidden" name="playlist_name" value={{p.id}}>
+                                                    <input type="hidden" name="playlist_id" value={{p.id}}>
+                                                    <input type="hidden" name="playlist_name" value={{p.name}}>
                                                     <input class="btn btn-link p-0 m-0" type="submit" value="Make it mine">
                                                 </form>
                                                 {% endif %}
