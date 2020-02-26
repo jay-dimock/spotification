@@ -212,13 +212,18 @@ def clone_followed_playlist(request):
 
     sp = spotipy.Spotify(auth=token)
     current_user = User.objects.get(id = request.session['user_id'])
-    original_playlist_tracks = sp.playlist_tracks(request.POST['playlist_id'], fields=None, limit=100, offset=0, market=None)
-    print("OVER HERE!!!")
-    print(json.dumps(original_playlist_tracks, sort_keys=True))
+    original_playlist_tracks_dict = sp.playlist_tracks(request.POST['playlist_id'], fields='items(track(uri))', limit=100, offset=0, market=None)
+    list_of_track_uris = []
+    for key in original_playlist_tracks_dict['items']:
+        list_of_track_uris.append(key['track']['uri'])
     new_playlist = sp.user_playlist_create(current_user.spotify_id, request.POST['playlist_name'], public=False, description='')
-    # sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], original_playlist_tracks, position=None)
+    sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], list_of_track_uris, position=None)
     unfollowed = sp.user_playlist_unfollow(current_user.spotify_id, request.POST['playlist_id'])
     return redirect('spotification:playlists-start')
+
+
+
+    # "track": {"album": {"album_type": "album", "artists": [{"external_urls": {"spotify": "https://open.spotify.com/artist/6iU0naWn1UgiTReoiXqPXI"}, "href": "https://api.spotify.com/v1/artists/6iU0naWn1UgiTReoiXqPXI", "id": "6iU0naWn1UgiTReoiXqPXI", "name": "Chuck Ragan", "type": "artist", "uri": "spotify:artist:6iU0naWn1UgiTReoiXqPXI"}], "available_markets": [], "external_urls": {"spotify": "https://open.spotify.com/album/5v9VhF7vX69wzUW6SVI8nC"}, "href": "https://api.spotify.com/v1/albums/5v9VhF7vX69wzUW6SVI8nC", "id": "5v9VhF7vX69wzUW6SVI8nC", "images": [{"height": 640, "url": "https://i.scdn.co/image/ab67616d0000b2733e3f856438310a78e56ad334", "width": 640}, {"height": 300, "url": "https://i.scdn.co/image/ab67616d00001e023e3f856438310a78e56ad334", "width": 300}, {"height": 64, "url": "https://i.scdn.co/image/ab67616d000048513e3f856438310a78e56ad334", "width": 64}], "name": "Covering Ground", "release_date": "2011-09-13", "release_date_precision": "day", "total_tracks": 10, "type": "album", "uri": "spotify:album:5v9VhF7vX69wzUW6SVI8nC"}, "artists": [{"external_urls": {"spotify": "https://open.spotify.com/artist/6iU0naWn1UgiTReoiXqPXI"}, "href": "https://api.spotify.com/v1/artists/6iU0naWn1UgiTReoiXqPXI", "id": "6iU0naWn1UgiTReoiXqPXI", "name": "Chuck Ragan", "type": "artist", "uri": "spotify:artist:6iU0naWn1UgiTReoiXqPXI"}], "available_markets": [], "disc_number": 1, "duration_ms": 195893, "episode": false, "explicit": false, "external_ids": {"isrc": "USA6G1145802"}, "external_urls": {"spotify": "https://open.spotify.com/track/33qnumlcObmJNo0WUFCeTw"}, "href": "https://api.spotify.com/v1/tracks/33qnumlcObmJNo0WUFCeTw", "id": "33qnumlcObmJNo0WUFCeTw", "is_local": false, "name": "Nomad by Fate", "popularity": 0, "preview_url": null, "track": true, "track_number": 2, "type": "track", "uri": "spotify:track:33qnumlcObmJNo0WUFCeTw"}
 
 # given a group name: if group exists, returns group id, else creates group & returns new group id.
 def add_group(user, group_name):

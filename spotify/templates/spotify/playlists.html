@@ -41,8 +41,7 @@
                                             <td>
                                                 {{p.owner.display_name}}
                                                 {% if user_spotify_id != p.owner.id %}
-                                                <!-- <br><a href="/unfollow_playlist/{{p.name}}">Make it mine</a> -->
-                                                <form action="{% url 'spotification:unfollow_playlist' %}" method="POST">
+                                                <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="playlist_id" value={{p.id}}>
                                                     <input type="hidden" name="playlist_name" value={{p.name}}>

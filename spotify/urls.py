@@ -19,5 +19,5 @@ urlpatterns = [
     path('rename-group', views.rename_group, name="rename-group"),
     path('delete-group', views.delete_group, name="delete-group"),
     path('player', views.player, name="player"),
-    path('unfollow_playlist', views.clone_followed_playlist, name="unfollow_playlist"),
+    path('clone_playlist', views.clone_followed_playlist, name="clone_playlist"),
 ]
