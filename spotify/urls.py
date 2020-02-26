@@ -18,5 +18,6 @@ urlpatterns = [
     path('new-group', views.new_group, name="new-group"),
     path('rename-group', views.rename_group, name="rename-group"),
     path('delete-group', views.delete_group, name="delete-group"),
-    path('player', views.player, name="player")
+    path('player', views.player, name="player"),
+    path('unfollow_playlist', views.clone_followed_playlist, name="unfollow_playlist"),
 ]

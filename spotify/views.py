@@ -59,6 +59,7 @@ def playlists(request, spotify_id):
 
     context = {
         "user_name" : User.objects.get(id=request.session['user_id']).full_name,
+        "user_spotify_id" : User.objects.get(id = request.session['user_id']).spotify_id,
         "my_playlists" : api_result['playlists'],
         "selected_playlist" : api_result['selected_playlist'],
         "internal_playlist_id": internal_playlist_id,
@@ -78,12 +79,12 @@ def get_all_playlists(user, token, spotify_playlist_id=None):
     while result:
         for i in range(len(result['items'])):
             p = result['items'][i]
-            if p['owner']['id'] == str(user.spotify_id): #for the moment, only show playlists owned by this user
+            # if p['owner']['id'] == str(user.spotify_id): #for the moment, only show playlists owned by this user
                 #for Jay D's account only: filter out friend Ryan's playlists:
-                if user.spotify_id=="124103193" and p['name'].startswith('Ryan -'): continue
-                playlists.append(p)  
-                if p['id'] == spotify_playlist_id:
-                    selected_playlist = p
+            if user.spotify_id=="124103193" and p['name'].startswith('Ryan -'): continue
+            playlists.append(p)  
+            if p['id'] == spotify_playlist_id:
+                selected_playlist = p
         if result['next']:
             result = sp.next(result)  
         else: result = None
@@ -201,6 +202,17 @@ def new_group(request):
     user = User.objects.get(id=request.session['user_id'])
     add_group(user,request.POST['new-group'])
     return redirect("spotification:groups-start")
+
+#Clone a playlist that the user doesn't own, add it to the database, and unfollow the original playlist
+def clone_followed_playlist(request):
+    #token = get_token(request.session)
+    #if not token: return no_token_redirect(request.session)
+
+    # sp = spotipy.Spotify(auth=token)
+    # unfollowed = sp.user_playlist_unfollow(User.objects.get(id = request.session['user_id']).spotify_id, request.POST['playlist_name'])
+    debug_print("User ID: "+User.objects.get(id = request.session['user_id']).spotify_id)
+    debug_print(request.POST['playlist_name'])
+    return redirect('spotification:home')
 
 # given a group name: if group exists, returns group id, else creates group & returns new group id.
 def add_group(user, group_name):
