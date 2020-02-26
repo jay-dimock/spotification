@@ -10,6 +10,7 @@ import urllib
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 import random
+from django.conf import settings
 
 #from django.views.decorators.csrf import csrf_exempt
 
@@ -441,9 +442,10 @@ def get_token(session):
 
 
 def get_oauth(username):
+    
     oauth = oauth2.SpotifyOAuth(
-        client_id = '583e191f6dc9453692417311ed7ed5e0', 
-        client_secret='2bb74912877749aebb340f7565e622a3', 
+        client_id = settings.SPOTIFY_CLIENT_ID, 
+        client_secret= settings.SPOTIFY_CLIENT_ID, 
         redirect_uri='http://localhost:8000/spotification/auth',
         scope=get_scope(), 
         username=username)
