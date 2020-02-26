@@ -293,7 +293,10 @@ def handle_playback(request):
                 tracks = get_tracks_for_group(request.POST['group-id'], token)
                 if len(tracks) == 0: 
                     return HttpResponse(False)
-                sp.start_playback(device_id=device_id, uris=tracks)
+                try:
+                    sp.start_playback(device_id=device_id, uris=tracks)
+                except spotipy.SpotifyException as e: 
+                    debug_print(e)
 
     elif action == "skip":
         sp.next_track(device_id=device_id)
@@ -330,13 +333,20 @@ def get_tracks_for_group(group_id, token):
                 if not bool(item['is_local']): #player won't play "local" (non-spotify) tracks
                     tracks.append(item['track']['uri'])
                 else:
-                     print("*** skipping local track:", item['track']['uri'], "***")
+                    print("*** skipping local track:", item['track']['uri'], "***")
 
             offset += len(response['items'])
 
     tracks=list(set(tracks)) #this removes duplicate tracks
     random.shuffle(tracks)
-    debug_print("tracks retrieved: " + str(len(tracks)))
+
+    message = "tracks retrieved: " + str(len(tracks))
+
+    max_tracks = 800
+    if len(tracks) > max_tracks:        
+        del tracks[max_tracks:] #delete all elements after the max
+        message += "\ntruncated to " + str(len(tracks)) + " tracks"
+    debug_print(message)
     return tracks;
 
 
