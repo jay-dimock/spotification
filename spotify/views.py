@@ -11,6 +11,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 import random
 from django.conf import settings
+import json
 
 #from django.views.decorators.csrf import csrf_exempt
 
@@ -212,8 +213,10 @@ def clone_followed_playlist(request):
     sp = spotipy.Spotify(auth=token)
     current_user = User.objects.get(id = request.session['user_id'])
     original_playlist_tracks = sp.playlist_tracks(request.POST['playlist_id'], fields=None, limit=100, offset=0, market=None)
+    print("OVER HERE!!!")
+    print(json.dumps(original_playlist_tracks, sort_keys=True))
     new_playlist = sp.user_playlist_create(current_user.spotify_id, request.POST['playlist_name'], public=False, description='')
-    sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], original_playlist_tracks, position=None)
+    # sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], original_playlist_tracks, position=None)
     unfollowed = sp.user_playlist_unfollow(current_user.spotify_id, request.POST['playlist_id'])
     return redirect('spotification:playlists-start')
 
