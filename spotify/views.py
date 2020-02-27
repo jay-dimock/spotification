@@ -447,7 +447,7 @@ def auth(request):
     user = User.objects.get(id=request.session['user_id'])
 
     sp_oauth = get_oauth(user.email) 
-    token_info = sp_oauth.get_access_token(code = request.GET['code'], as_dict=False)
+    token_info = sp_oauth.get_access_token(code = request.GET['code'], as_dict=True)
 
     if not token_info:
         return error(request, "Auth code was sent to Spotify but no token info was returned")
