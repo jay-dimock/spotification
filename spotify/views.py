@@ -217,6 +217,8 @@ def clone_followed_playlist(request):
     for key in original_playlist_tracks_dict['items']:
         list_of_track_uris.append(key['track']['uri'])
     new_playlist = sp.user_playlist_create(current_user.spotify_id, request.POST['playlist_name'], public=False, description='')
+    debug_print(request.POST['playlist_name'])
+    sp.user_playlist_create(current_user.spotify_id, "Best Playlist Ever!", public=False, description='')
     sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], list_of_track_uris, position=None)
     unfollowed = sp.user_playlist_unfollow(current_user.spotify_id, request.POST['playlist_id'])
     return redirect('spotification:playlists-start')
