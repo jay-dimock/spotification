@@ -18,6 +18,10 @@ $(document).ready(function(){
         $('#delete-modal').css("display", "block");
     });
 
+    $('.clone-link').click(function(e) {
+        $(this).next('.modal').css("display", "block");
+    });
+
     $('#rename-group-link').click(function() {
         $('#rename-modal').css("display", "block");
     })

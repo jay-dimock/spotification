@@ -6,7 +6,10 @@ $(document).ready(function(){
     $('#play-group-button').hide()
     $('#player').hide()
 
-    $('tr').click(function(){
+    $('tr').click(function(e){
+        if(e.target.getAttribute('modal')=='clone'){
+            return;
+        }
         id=$(this).next('input').val()
         $(location).attr('href', id);
     });
