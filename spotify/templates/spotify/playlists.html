@@ -48,7 +48,7 @@
                                                     <input type="hidden" name="playlist_name" value="{{p.name}}">
                                                     <input class="btn btn-link p-0 m-0" type="submit" value="Make it mine">
                                                 </form> -->
-                                                <span class="clone-link btn btn-link pt-0 pb-0 text-success">Make It Mine!</span>
+                                                <span class="clone-link btn btn-link pt-0 pb-0 text-success" modal='clone'>Make It Mine!</span>
                                                 <div class="modal clone-modal" >
                                                     <!-- Modal content -->
                                                     <div class="modal-content" id="modal-content">
@@ -57,7 +57,7 @@
                                                         </div>
                                                         <div class = "modal-message">
                                                             <p>Are you user you want to clone the playlist <b>{{p.name}}</b>?</p>
-                                                            <p>Doing so will unfollow the selected playlist, but it will make a clone giving you power to make any changes.</p>
+                                                            <p>This will make a copy of the playlist that you can make your own changes to -- you will own it! Doing so will unfollow the selected playlist.</p>
                                                             <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="playlist_id" value="{{p.id}}">
