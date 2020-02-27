@@ -453,10 +453,8 @@ def auth(request):
         return error(request, "Auth code was sent to Spotify but no token info was returned")
 
     if not user.spotify_id:
-        debug_print(token_info)
         sp = spotipy.Spotify(token_info['access_token'])
         results = sp.current_user()
-        debug_print(results)
         user.spotify_id = results['id']
         user.save()
     
