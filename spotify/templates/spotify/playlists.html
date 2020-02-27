@@ -41,10 +41,10 @@
                                             <td>
                                                 {{p.owner.display_name}}
                                                 {% if user_spotify_id != p.owner.id %}
-                                                <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
+                                                <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal bg-transparent">
                                                     {% csrf_token %}
-                                                    <input type="hidden" name="playlist_id" value={{p.id}}>
-                                                    <input type="hidden" name="playlist_name" value={{p.name}}>
+                                                    <input type="hidden" name="playlist_id" value="{{p.id}}">
+                                                    <input type="hidden" name="playlist_name" value="{{p.name}}">
                                                     <input class="btn btn-link p-0 m-0" type="submit" value="Make it mine">
                                                 </form>
                                                 {% endif %}
