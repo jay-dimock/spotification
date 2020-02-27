@@ -11,7 +11,8 @@
             integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
-        <script src="{% static 'playlists.js' %}" defer></script>   
+        <script src="{% static 'playlists.js' %}" defer></script>
+        <script src="{% static 'modal.js' %}" defer></script>   
         <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
     </head>
     <body>
@@ -41,12 +42,34 @@
                                             <td>
                                                 {{p.owner.display_name}}
                                                 {% if user_spotify_id != p.owner.id %}
-                                                <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal bg-transparent">
+                                                <!-- <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal bg-transparent">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="playlist_id" value="{{p.id}}">
                                                     <input type="hidden" name="playlist_name" value="{{p.name}}">
                                                     <input class="btn btn-link p-0 m-0" type="submit" value="Make it mine">
-                                                </form>
+                                                </form> -->
+                                                <span class="clone-link btn btn-link pt-0 pb-0 text-success">Make It Mine!</span>
+                                                <div class="modal clone-modal" >
+                                                    <!-- Modal content -->
+                                                    <div class="modal-content" id="modal-content">
+                                                        <div id="modal-title">
+                                                            <span id="close" class="close-modal">&times;</span> Confirm Playlist Cloning
+                                                        </div>
+                                                        <div class = "modal-message">
+                                                            <p>Are you user you want to clone the playlist <b>{{p.name}}</b>?</p>
+                                                            <p>Doing so will unfollow the selected playlist, but it will make a clone giving you power to make any changes.</p>
+                                                            <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="playlist_id" value="{{p.id}}">
+                                                                <input type="hidden" name="playlist_name" value="{{p.name}}">
+                                                                <div class="text-center">
+                                                                    <span class="close-modal btn btn-secondary">Cancel</span>
+                                                                    <button type="submit" class="btn btn-success">Get Cloning!</button> 
+                                                                </div>
+                                                            </form>
+                                                        </div>                                
+                                                    </div>
+                                                </div>
                                                 {% endif %}
                                             </td>
                                             <td>{{p.tracks.total}}</td>
