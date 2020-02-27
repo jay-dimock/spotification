@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 from login.models import User
 from spotify.models import *
 import spotipy
@@ -12,6 +13,7 @@ from urllib.parse import urlencode
 import random
 from django.conf import settings
 import json
+
 
 #from django.views.decorators.csrf import csrf_exempt
 
@@ -90,6 +92,8 @@ def get_all_playlists(user, token, spotify_playlist_id=None):
         if result['next']:
             result = sp.next(result)  
         else: result = None
+
+    playlists = sorted(playlists, key=lambda playlist: playlist['name'])
 
     return {"playlists": playlists, "selected_playlist":selected_playlist}
 
@@ -297,7 +301,9 @@ def handle_playback(request):
 
     token = get_token(request.session)
     if not token: 
-        raise ValueError('Spotification was unable to retrieve user token') 
+        #raise HTTPError('handle_playback', 401, 'Spotification was unable to retrieve user token')
+        raise PermissionDenied
+        #raise ValueError('Spotification was unable to retrieve user token') 
 
     sp = spotipy.Spotify(auth=token)
 
