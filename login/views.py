@@ -28,7 +28,7 @@ def register(request):
         first_name=request.POST['first-name'].strip(),
         last_name=request.POST['last-name'].strip(),
         birthday=request.POST['birthday'],
-        email=request.POST['email'].strip(),
+        email=request.POST['email'].strip().lower(),
         password=hashedpw
     )
     clear_registration_session(request)
@@ -45,7 +45,7 @@ def login(request):
         return redirect("login:home")
     
     clear_login_session(request)
-    request.session['user_id'] = User.objects.get(email=request.POST['email'].strip()).id
+    request.session['user_id'] = User.objects.get(email=request.POST['email'].strip().lower()).id
     return redirect("spotification:home")
 
 def profile(request):
@@ -72,7 +72,7 @@ def edit_profile(request):
             messages.error(request, value, extra_tags=key) 
         return redirect("login:profile")
 
-    user.email = request.POST['email'].strip()
+    user.email = request.POST['email'].strip().lower()
     user.first_name = request.POST['first-name'].strip()
     user.last_name = request.POST['last-name'].strip()
     user.save()

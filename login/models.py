@@ -6,11 +6,11 @@ from dateutil.relativedelta import relativedelta #helps with counting years betw
 
 class UserManager(models.Manager):
     def email_message(self, postData):
-        if not postData['email']:
+        if not postData['email'].strip():
             return "Email is required"
         else:
             EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-            if not EMAIL_REGEX.match(postData['email']):
+            if not EMAIL_REGEX.match(postData['email'].strip()):
                 return 'Email format is not valid'
         return ''
 
@@ -43,7 +43,7 @@ class UserManager(models.Manager):
             errors['email'] = e
             return errors
 
-        users = User.objects.exclude(id=user_id).filter(email=postData['email'].strip())
+        users = User.objects.exclude(id=user_id).filter(email=postData['email'].strip().lower())
         if len(users) > 0:
             errors['email'] = "This email is already registered"
         return errors
@@ -57,7 +57,7 @@ class UserManager(models.Manager):
         if e: errors['email'] = e
 
         if not e:
-            users = User.objects.filter(email=postData['email'].strip())
+            users = User.objects.filter(email=postData['email'].strip().lower())
             if len(users) > 0:
                 errors['email'] = "This email is already registered"
 
@@ -84,7 +84,7 @@ class UserManager(models.Manager):
         if p: errors['password'] = p
         
         if not e:
-            users = User.objects.filter(email=postData['email'].strip())
+            users = User.objects.filter(email=postData['email'].strip().lower())
             if users.count() == 0:
                 errors['email'] = "This email address is not yet registered"
             else:
