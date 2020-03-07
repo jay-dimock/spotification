@@ -228,7 +228,7 @@ def clone_followed_playlist(request):
                 list_of_track_uris.append(key['track']['uri'])
             else:
                 print("*** skipping local track:", key['track']['uri'], "***")  
-        debug_print("list_of_track_uris: " + str(len(list_of_track_uris)))
+
         #This covers the case where all 100 tracks being scanned are local tracks and would break not adding tracks to the playlist
         if len(list_of_track_uris) > 0:
             sp.user_playlist_add_tracks(current_user.id, new_playlist['id'], list_of_track_uris)
@@ -317,7 +317,7 @@ def handle_playback(request):
     action = request.POST['action'].lower()
     device_id = request.POST['device-id']
 
-    print("*"*50, "\nPOST data:", request.POST)
+    # print("*"*50, "\nPOST data:", request.POST)
 
     if action == "play":
         # by not providing a uri to the api, playback will continue where it left off
@@ -388,7 +388,7 @@ def get_tracks_for_group(group_id, token):
     if len(tracks) > max_tracks:        
         del tracks[max_tracks:] #delete all elements after the max
         message += "\ntruncated to " + str(len(tracks)) + " tracks"
-    debug_print(message)
+    # debug_print(message)
     return tracks;
 
 
