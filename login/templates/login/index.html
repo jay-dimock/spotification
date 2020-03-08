@@ -15,31 +15,35 @@
     </head>
     <body>
         {% include 'navbar.html' %}
-        <form class="login-form" id="login-form" action="{% url 'login:login' %}" method="post">
-            {% csrf_token %}
-            <h1>Log In</h1>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <div id="email-message" class="text-danger">
-                    {% if messages %} {% for m in messages %} 
-                    {% if m.extra_tags == 'email' %} {{m}} {% endif %}
-                    {% endfor %} {% endif %}
-                </div>
-                <input type="text" name="email" id="email" class="form-control"
-                    value="{{request.session.login_email}}">
+        <div class="container-fluid">
+            <div class="container-inner login-form">
+                <form id="login-form" action="{% url 'login:login' %}" method="post">
+                    {% csrf_token %}
+                    <h1>Log In</h1>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div id="email-message" class="text-danger">
+                            {% if messages %} {% for m in messages %} 
+                            {% if m.extra_tags == 'email' %} {{m}} {% endif %}
+                            {% endfor %} {% endif %}
+                        </div>
+                        <input type="text" name="email" id="email" class="form-control"
+                            value="{{request.session.login_email}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div id="password-message" class="text-danger">
+                            {% if messages %} {% for m in messages %}
+                            {% if m.extra_tags == 'password' %} {{m}} {% endif %}
+                            {% endfor %} {% endif %}
+                        </div>
+                        <input type="password" name="password" id="password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Log In</button>
+                    <p class="pt-4"><a href = "{% url 'login:new-user' %}">Don't have an account? Register.</a>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div id="password-message" class="text-danger">
-                    {% if messages %} {% for m in messages %}
-                    {% if m.extra_tags == 'password' %} {{m}} {% endif %}
-                    {% endfor %} {% endif %}
-                </div>
-                <input type="password" name="password" id="password" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-secondary">Log In</button>
-            <p class="pt-4"><a href = "{% url 'login:new-user' %}">Don't have an account? Register.</a>
-        </form>
+        </div>        
     </body>
 </html>
 
