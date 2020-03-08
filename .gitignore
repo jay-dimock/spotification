@@ -6,3 +6,5 @@ env/
 prodenv/
 __pycache__/
 static/
+__pycache__/*
+*/__pycache__/*

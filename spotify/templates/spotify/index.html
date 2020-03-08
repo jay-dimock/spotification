@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        {% include 'head.html' %}
         <title>Spotification</title>
-        <meta name="description" content="Spotify Clone">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
-            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        {% load static %}
-        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">     
+        <meta name="description" content="Spotification provides additional Spotify playlist features you can't get directly through Spotify. 
+            Combine playlists into groups! Clone playlists you follow so you can modify them!">
+        {% load static %} 
         <script src="{% static 'playlists.js' %}" defer></script>   
-        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>
     </head>
     <body>
         {% include 'navbar.html' %}
@@ -29,6 +23,7 @@
                 <p>The "Make it Mine" feature allows you to make a privately owned copy of a playlist you're following. 
                     Once cloned, you can edit the new playlist as you wish. The original playlist will be unfollowed.
                 </p>
+                <h4>What would you like to do?</h4>
                 <ul>
                     <li><a href="{% url 'spotification:playlists-start' %}">Manage Playlists</a></li>
                     <li><a href="{% url 'spotification:groups-start' %}">Manage Groups</a></li>
