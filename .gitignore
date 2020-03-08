@@ -1,7 +1,0 @@
-.vscode/
-db.sqlite3
-*.cache-*
-*.env
-env/
-venv/
-__pycache__/
