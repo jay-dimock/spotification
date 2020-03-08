@@ -207,8 +207,8 @@ def new_group(request):
     if not 'user_id' in request.session:
         return redirect("login:home")
     user = User.objects.get(id=request.session['user_id'])
-    add_group(user,request.POST['new-group'])
-    return redirect("spotification:groups-start")
+    group_id = add_group(user,request.POST['new-group'])
+    return redirect("spotification:groups", group_id=group_id)
 
 #Clone a playlist that the user doesn't own, add it to the database, and unfollow the original playlist
 def clone_followed_playlist(request):
