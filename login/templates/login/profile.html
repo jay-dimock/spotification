@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>User Profile</title>
-        <meta name="description" content="View/Edit User Profile">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
-            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        {% include 'head.html' %}
+        <title>Spotification - User Profile</title>
+        <meta name="description" content="View/Edit your Spotification profile">
+        {% load string_ext %} 
         {% load static %}
-        {% load string_ext %}
-        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
-        <link rel="shortcut icon" type="image/png" href="{% static 'spotify_favicon.png' %}"/>      
         <script src="{% static 'modal.js' %}" defer></script>  
     </head>
     <body>
