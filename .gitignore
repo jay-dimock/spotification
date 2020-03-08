@@ -3,5 +3,6 @@ db.sqlite3
 *.cache-*
 *.env
 env/
-venv/
+prodenv/
 __pycache__/
+static/
