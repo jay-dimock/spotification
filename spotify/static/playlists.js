@@ -133,7 +133,7 @@ function spotifyWebPlaybackSDKReady() {
 
         var playlist = state['context']['metadata']['context_description']
         var track = state['track_window']['current_track']
-        var html = "Now playing:<ul>"
+        var html = "<ul>"
 
         if (playlist === undefined) {
             html += '<li>Group: ' + $('#selected-group-id option:selected').text() + '</li>'            
