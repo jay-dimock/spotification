@@ -14,63 +14,7 @@
         <div class="container-fluid">
             <div class="container-inner">
                 <div class= "row">
-                    <div class="col col-sm-6  mb-4">
-                        <div id="playlists">
-                            <h4>My Playlists</h4>
-                            <p><b>Count: {{my_playlists|length}}</b></p>
-                            <label>Click on a playlist below to edit it</label>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-sm table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                        <th>Playlist Name</th>
-                                        <th>Owner</th>
-                                        <th>Tracks</th>
-                                        <th>Open</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for p in my_playlists %}
-                                        <tr>                                        
-                                            <td>{{p.name}}</td>
-                                            <td>
-                                                {{p.owner.display_name}}
-                                                {% if user_spotify_id != p.owner.id %}
-                                                <span class="clone-link btn btn-link pt-0 pb-0 text-success" modal='clone'>Make It Mine!</span>
-                                                <div class="modal clone-modal" >
-                                                    <!-- Modal content -->
-                                                    <div class="modal-content" id="modal-content">
-                                                        <div id="modal-title">
-                                                            <span id="close" class="close-modal">&times;</span> Confirm Playlist Cloning
-                                                        </div>
-                                                        <div class = "modal-message">
-                                                            <p>Are you sure you want to clone the playlist <b>{{p.name}}</b>?</p>
-                                                            <p>This will make a copy of the playlist that you can make your own changes to -- you will own it! Doing so will unfollow the selected playlist.</p>
-                                                            <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="playlist_id" value="{{p.id}}">
-                                                                <input type="hidden" name="playlist_name" value="{{p.name}}">
-                                                                <div class="text-center">
-                                                                    <span class="close-modal btn btn-secondary">Cancel</span>
-                                                                    <button type="submit" class="btn btn-success">Get Cloning!</button> 
-                                                                </div>
-                                                            </form>
-                                                        </div>                                
-                                                    </div>
-                                                </div>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{p.tracks.total}}</td>
-                                            <td><a href="{{p.external_urls.spotify}}">Spotify Site</a></td>
-                                        </tr>
-                                        <input type="hidden" name="playlist-id" value="{{p.id}}">
-                                        {% endfor %}
-                                    </tbody>                          
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col col-sm-6">
+                    <div class="col col-lg-6 col-lg-pull-6 mb-4">
                         <form id="playlist-form" action="{% url 'spotification:update-playlist' %}"  method="post" class="minimal">
                             {% if not selected_playlist %}
                             <h4>Selected Playlist: None</h4>
@@ -104,12 +48,79 @@
                                 <label for="new-group">Add to new group:</label>
                                 <input type="text" name="new-group" class="form-control">
                             </div>
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-secondary">Update</button>
+
+                            <div class = "row">
+                                <div class="col col-sm-5 col-sm-pull-7">
+                                    <button type="submit" class="btn btn-secondary">Update</button>
+                                </div>
+                                <div class="col col-sm-7 col-sm-push-5 text-right">
+                                    <a href="{{selected_playlist.external_urls.spotify}}">Open on Spotify</a>
+                                </div>
+                                
                             </div>
+                            <!-- <div class="text-right">
+                                <a href="{{selected_playlist.external_urls.spotify}}">Open on Spotify</a>
+                                <button type="submit" class="btn btn-secondary">Update</button>
+                            </div> -->
                             {% endif %}
                         </form>
                     </div>
+
+                    <div class="col col-lg-6 col-lg-push-6">
+                        <div id="playlists">
+                            <h4>My Playlists</h4>
+                            <p><b>Count: {{my_playlists|length}}</b></p>
+                            <label>Click on a playlist below to edit it</label>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                        <th>Playlist Name</th>
+                                        <th>Owner</th>
+                                        <th>Tracks</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in my_playlists %}
+                                        <tr>                                        
+                                            <td>{{p.name}}</td>
+                                            <td>
+                                                {{p.owner.display_name}}
+                                                {% if user_spotify_id != p.owner.id %}
+                                                <div class="clone-link link text-success text-left" modal='clone'>Make It Mine!</div>
+                                                <div class="modal clone-modal" >
+                                                    <!-- Modal content -->
+                                                    <div class="modal-content" id="modal-content">
+                                                        <div id="modal-title">
+                                                            <span id="close" class="close-modal">&times;</span> Confirm Playlist Cloning
+                                                        </div>
+                                                        <div class = "modal-message">
+                                                            <p>Are you sure you want to clone the playlist <b>{{p.name}}</b>?</p>
+                                                            <p>This will make a copy of the playlist that you can make your own changes to -- you will own it! Doing so will unfollow the selected playlist.</p>
+                                                            <form action="{% url 'spotification:clone_playlist' %}" method="POST" class="minimal">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="playlist_id" value="{{p.id}}">
+                                                                <input type="hidden" name="playlist_name" value="{{p.name}}">
+                                                                <div class="text-center">
+                                                                    <span class="close-modal btn btn-secondary">Cancel</span>
+                                                                    <button type="submit" class="btn btn-success">Get Cloning!</button> 
+                                                                </div>
+                                                            </form>
+                                                        </div>                                
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{p.tracks.total}}</td>
+                                        </tr>
+                                        <input type="hidden" name="playlist-id" value="{{p.id}}">
+                                        {% endfor %}
+                                    </tbody>                          
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
