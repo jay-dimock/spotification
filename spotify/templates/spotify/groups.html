@@ -13,48 +13,7 @@
         <div class="container-fluid">
             <div class="container-inner">
                 <div class= "row">
-                    <div class="col col-sm-6  mb-4">
-                        <div id="groups">
-                            <h4>My Playlist Groups</h4>                            
-                            <form id="new-group-form" action="{% url 'spotification:new-group' %}" 
-                                method="post" class="minimal">
-                                {% csrf_token %}
-                                <div class="form-group form-row mt-3">
-                                    <label for="new-group" class="col-sm-3 col-form-label text-right hidden-xs">New Group</label>
-                                    <div class="col-sm-7 mb-2">
-                                        <input id="new-group" name="new-group" class="form-control" 
-                                            placeholder="new group name">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <button type="submit" class="btn btn-secondary">Add</button>
-                                    </div>
-                                </div>
-                            </form>
-                            <label>Click on a group to edit it</label>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-sm table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Group</th>
-                                            <th>Playlists</th>
-                                            <!-- <th>Action</th> -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for g in groups %}
-                                        <tr>
-                                            <td>{{g.name}}</td>
-                                            <td>{{g.playlists.all.count}}</td>
-                                            <!-- <td><span class="btn btn-link pt-0 pb-0 text-success">delete</span></td> -->
-                                        </tr>
-                                        <input type="hidden" name="group-id" value="{{g.id}}">
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col col-sm-6">                       
+                    <div class="col col-lg-6 col-lg-pull-6 mb-4">                       
                         {% if not selected_group %}
                         <h4>Selected Group: None</h4>
                         {% else %}                        
@@ -133,21 +92,57 @@
                                     <option value="{{p.id}}">{{p.name}}</option>
                                     {% endfor %}
                                 </select> 
-                                <div class="text-right mt-3">
+                                <div class="mt-1">
                                     <button type="submit" class="btn btn-secondary">Add</button>
                                 </div>
                             </div>
-                            
-                            <!-- <div class="form-group">
-                                <label for="new-group">Add to new group:</label>
-                                <input type="text" name="new-group" class="form-control">
-                            </div>
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-secondary">Update</button>
-                            </div> -->
                             {% endif %}
                         </form>
                     </div>
+
+                    <div class="col col-lg-6 col-lg-push-6">
+                        <div id="groups">
+                            <h4>My Playlist Groups</h4>                            
+                            <form id="new-group-form" class="form-inline mb-2" action="{% url 'spotification:new-group' %}" 
+                                method="post" class="minimal">
+                                {% csrf_token %}
+                                <!-- <div class="form-group form-row mt-3"> -->
+                                    <label for="new-group" class="hidden-xs mr-2 mb-1">New Group</label>
+                                    <!-- <div class="col-sm-7 "> -->
+                                    <input id="new-group" name="new-group" class="form-control mr-2 mb-1" 
+                                        placeholder="new group name">
+                                    <!-- </div> -->
+                                    <!-- <div class="col-sm-2"> -->
+                                        <button type="submit" class="btn btn-secondary mb-1">Add</button>
+                                    <!-- </div> -->
+                                <!-- </div> -->
+                            </form>
+                            <label>Click on a group to edit it</label>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Group</th>
+                                            <th>Playlists</th>
+                                            <!-- <th>Action</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for g in groups %}
+                                        <tr>
+                                            <td>{{g.name}}</td>
+                                            <td>{{g.playlists.all.count}}</td>
+                                            <!-- <td><span class="btn btn-link pt-0 pb-0 text-success">delete</span></td> -->
+                                        </tr>
+                                        <input type="hidden" name="group-id" value="{{g.id}}">
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>

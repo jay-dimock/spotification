@@ -1,6 +1,6 @@
 {% load static %}
 {% if request.session.user_id %}
-<nav class="navbar navbar-expand-md sticky-top">
+<nav class="navbar navbar-expand-md sticky-top pt-3">
     <div class="brand-header px-2">
         <img id="logo" src="{% static 'spotify_favicon.png' %}" alt="logo">
         Spotification <span class="d-none d-sm-inline-block">{% if user_name %} - {{user_name}} {% endif %}</span> 
@@ -29,3 +29,18 @@
     <span class="nav-item"><a class="nav-link pl-2" href="{% url 'login:home' %}">Log In</a></span>
 </nav>  
 {% endif %}
+<div id="js-warning"></div>
+<script>
+    try
+    {
+        Function("() => {};"); 
+    }
+    catch(exception)
+    {
+        var message = "<div class='bg-danger text-white text-center p-2'>";
+        message += "This browser is using an older version of JavaScript which is not compatible with this site (or JavaScript is disabled). The site will not work properly.";
+        message += "</div>";
+        console.log(message);
+        document.getElementById('js-warning').innerHTML=message;
+    }
+</script>
