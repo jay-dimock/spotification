@@ -502,7 +502,7 @@ def get_oauth(username):
     oauth = oauth2.SpotifyOAuth(
         client_id = settings.SPOTIFY_CLIENT_ID, 
         client_secret= settings.SPOTIFY_CLIENT_SECRET, 
-        redirect_uri='https://spotifygroups.com/spotification/auth',
+        redirect_uri='https://playlistgroups.com/spotification/auth',
         scope=scope, 
         username=username,
         show_dialog=True)
