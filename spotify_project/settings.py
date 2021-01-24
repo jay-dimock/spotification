@@ -30,7 +30,7 @@ SPOTIFY_CLIENT_SECRET = os.environ['SPOTIFY_CLIENT_SECRET']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['spotifygroups.com', 'www.spotifygroups.com', '165.227.49.15','localhost']
+ALLOWED_HOSTS = ['playlistgroups.com', 'www.playlistgroups.com', '165.227.49.15','localhost']
 
 
 # Application definition
