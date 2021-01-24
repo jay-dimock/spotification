@@ -8,3 +8,4 @@ __pycache__/
 static/
 __pycache__/*
 */__pycache__/*
+server_deploy_commands.txt
