@@ -6,7 +6,7 @@ cffi==1.14.0
 chardet==3.0.4
 colorama==0.4.3
 decorator==4.4.1
-Django==3.1.5
+Django==3.1.10
 django-debug-toolbar==2.2
 idna==2.8
 ipython==7.12.0
